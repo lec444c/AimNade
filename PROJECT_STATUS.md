@@ -20,11 +20,15 @@
 
 ## Current Goal
 
-把 Mirage 单地图 MVP 从"功能可用"推进到"内容完整、可交付"：
+把 Mirage 单地图 MVP 从"功能可用"推进到"可交付"，**优先级已在 2026-09-16 修订**（真实教学截图允许继续使用占位图）：
 
-1. 补齐 18 张教学图片资源（**P0，当前唯一的硬缺口**）。
-2. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
-3. 配置 App Icon 与 Accent Color，并把过期的 `README.md` 同步到真实状态。
+1. **配置正式 App Icon 与 Accent Color**（P0-1，当前最高优先级）。
+2. **对当前 V1 做一次完整产品流程检查**（P0-2）：首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。只检查现有实现与明显问题，**不新增大功能**。
+3. **专项 localization audit**（P0-3）：修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
+4. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
+5. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
+
+完整的优先级拆分见 `## Next`。
 
 ## Completed
 
@@ -102,54 +106,66 @@
 
 ### 尚未收敛的能力缺口
 
-- **18 张教学图片全部缺失**（详见 Known Issues）。
+- **18 张教学图片全部缺失**（详见 Known Issues）。**已确认不阻塞交付**：真实截图就绪前占位图可继续使用，已降级为 P1 内容填充任务。
 - **内容体量小且为占位数据**：3 个道具组 / 6 个投掷方案，全部 T 方 Smoke。
-- **JSON 加载失败路径不可见**：当前静默回退空 `Map`。已确认不是最终设计，优化方向见 `## Next` P1 第 7 项与 Known Issues 第 6 条。
-- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 95）。**已决定本轮不补**，改为后续做一次专项 localization audit，见 `## Next` 第 3 项。
+- **JSON 加载失败路径不可见**：当前静默回退空 `Map`。已确认不是最终设计，优化方向见 `## Next` P1 第 4 项与 Known Issues 第 6 条。
+- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 95，差 34 个）。已排为 P0-3，做一次专项 localization audit **修正文档**（不重构 App），见 `## Next` P0 第 3 项。
 - 无测试覆盖。
 
 ## Next
 
 > 范围纪律：**V1 只做 Mirage**。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
-> P0-1 是当前唯一必须做的事。
+> **优先级已修订（2026-09-16）：真实教学截图允许继续使用占位图，因此"补齐 18 张教学图片"不再是最高优先级**，改为内容填充类收尾任务（见 P1-10）；当前最高优先级是 P0-1。
+> P0 的三项都属于"在当前实现上做检查或配置"，**不要因此新增大功能**。
 
-### P0 — 让产品"看起来是完整的"
+### P0 — 交付前置与完整性确认
 
-1. **补齐 18 张教学图片**（最高优先，见 Next Agent Handoff）。这是 V1 核心体验"截图教学"的硬缺口。
-2. **配置 App Icon 与 Accent Color**：上架与观感的前置条件，成本极低。
+1. **配置正式 App Icon 与 Accent Color**（当前最高优先级）。
+   - `AppIcon.appiconset/Contents.json` 无 `filename` → 没有实际图标；`AccentColor.colorset/Contents.json` 无颜色值 → Accent Color 未生效。
+   - 上架与观感的硬前置，成本极低，且**不需要改任何 Swift 代码**。
+2. **对当前 V1 做一次完整产品流程检查**：只检查现有实现与明显问题，**不新增大功能**。
+   - 逐项走查：Mirage 首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。
+   - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
+   - **已知可接受项**：教学图片显示占位图属预期行为，**不要把它记为新缺陷**（见第 10 项）。
+   - 发现的问题按"明显问题"与"新功能需求"分类记录：明显问题可修，新功能需求只登记进本文件，不在本轮实现。
 3. **专项 localization audit**：`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记 61 个 key，实际 `L10n.Key` 有 95 个，**存在 34 个差异**。
-   - **本轮决定：暂不补齐**，不做零散修补，改为后续安排一次专项 audit 统一对齐。
+   - 目标：**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
    - audit 范围：比对 `L10n.Key` 与实际清单、确认中英文双语分支无遗漏、确认 `Views/` 下无硬编码文案、把 V1 范围约束补进规范文档。
-   - **不要为了补清单而改动 App 功能。**
-4. **更新 `README.md`**：它只用于面向开发者/用户描述项目，**不作为 AI 进度日志**；详细进度只放在本文件。当前 README 仍写"1 张地图 / 10 个静态道具点"，与真实状态不符。
-   - 它属已跟踪文件，本轮边界是"只提交交接文档"，故**本轮未改**。
-5. **建立占位数据的显式标记机制**：当前 3 组 / 6 方案属于占位/示例数据（数值坐标为手工挑选、教学图不存在、未与真实游戏对拍）。
-   - 最低要求：在文档与提交信息中持续明确标注。
-   - 可选增强：为模型增加可选字段（如 `isPlaceholder`）并在 UI 上显示提示——**属于数据模型变更，需先确认再动手**（见 Known Issues 的待确认项）。
+   - **约束：不要为了补 key 而重构 App。** 只改文档；若发现代码侧真正不一致（例如某 key 只有英文没有中文），单独记录并按需最小修复，不做结构性改动。
 
-### P1 — 让内容真正可用
+### P1 — 数据可靠性与内容填充
 
-7. **JSON 加载失败的可观察化**（已确认不是最终设计，静默 fallback 不得长期掩盖数据错误）：
+4. **JSON 加载失败的可观察化**（已确认不是最终设计，静默 fallback 不得长期掩盖数据错误）：
    - **Debug 环境**输出明确的 JSON decode / load 错误（带文件名与具体解码失败原因）。
    - **Release / UI 层**显示合理的 empty state，而不是让用户面对一个无解释的空列表。
    - 保留 fallback 本身（防止 App crash）没有问题，**要改的是"静默"**。
    - 当前 `LineupStore` 的 `catch` 块为空，未修改 Swift 代码；此项属于后续任务。
+5. **建立占位数据的显式标记机制**：当前 3 组 / 6 方案属于占位/示例数据（数值坐标为手工挑选、教学图不存在、未与真实游戏对拍）。
+   - 说明：教学图**允许继续使用占位图**（2026-09-16 决定），这只意味着"占位状态可以长期存在"，**不意味着这些数据可以被当作已核实的真实数据**。
+   - 最低要求：在文档与提交信息中持续明确标注。
+   - 可选增强：为模型增加可选字段（如 `isPlaceholder`）并在 UI 上显示提示——**属于数据模型变更，需先确认再动手**（见 Known Issues 的待确认项）。
+6. 数据校验：ID 唯一性、坐标范围、图片资源存在性。
+7. **更新 `README.md`**：它只用于面向开发者/用户描述项目，**不作为 AI 进度日志**；详细进度只放在本文件。当前 README 仍写"1 张地图 / 10 个静态道具点"，与真实状态不符。
+   - 它属已跟踪文件，此前几轮边界是"只提交交接文档"，故一直未改。
 8. 扩充 Mirage 内容：先补 B 包点、CT 方两个空洞分类，再补 Flash / Molotov / HE。**扩充前必须先确定真实数据来源与核验方式**（见 Next Agent Handoff 的风险项）。
-9. 数据校验：ID 唯一性、坐标范围、图片资源存在性。
+9. **录入真实 Mirage 道具数据**：取代当前占位/示例数据，并记录来源与核验方式。
+10. **补齐 18 张教学图片**（**已降级为内容填充收尾任务**，2026-09-16 决定）：真实教学截图尚未就绪期间，**占位图可以继续使用，不阻塞交付**。
+    - 资源名清单（6 个前缀 × `_position` / `_aim` / `_result` = 18 个）保留在 `## Next Agent Handoff` 中，需要时可查。
+    - **图片的来源与授权需先确认**（见 Known Issues 第 18 条），这是真正的前置条件，而不是优先级问题。
 
 ### P2 — 让代码可继续演进
 
-10. 拆分 `TacticalMapView.swift`：把地图渲染、过滤、聚类、坐标换算、缩放容器、开发者工具拆成独立文件 / 类型。
-11. 建立测试 target：优先覆盖 JSON 解码、搜索匹配、聚类、坐标换算、收藏持久化——全是纯函数，成本低、回归收益高。
+11. 拆分 `TacticalMapView.swift`：把地图渲染、过滤、聚类、坐标换算、缩放容器、开发者工具拆成独立文件 / 类型。
+12. 建立测试 target：优先覆盖 JSON 解码、搜索匹配、聚类、坐标换算、收藏持久化——全是纯函数，成本低、回归收益高。
 
 ### P3 — 体验打磨
 
-12. 验证 iPad 布局、横屏、Dynamic Type、VoiceOver、深色模式，以及大量点位下的地图性能。
-13. 完善开发者数据工作流：在保持"不写回仓库"安全边界的前提下，明确坐标导出 → 校验 → 更新 JSON 的流程。
+13. 验证 iPad 布局、横屏、Dynamic Type、VoiceOver、深色模式，以及大量点位下的地图性能。
+14. 完善开发者数据工作流：在保持"不写回仓库"安全边界的前提下，明确坐标导出 → 校验 → 更新 JSON 的流程。
 
 ### 条件性任务（等触发条件出现再做）
 
-14. **把 `MapListView` 接入根导航**：**已确认是刻意设计**（V1 只做 Mirage，用户不需要先看地图列表）。
+15. **把 `MapListView` 接入根导航**：**已确认是刻意设计**（V1 只做 Mirage，用户不需要先看地图列表）。
     - 触发条件：**开始增加第二张地图时**，才把它提升为正式任务。
     - 届时应一并把 `MirageDetailView` 等 Mirage 专用命名泛化为 `MapDetailView`。
     - **在此之前维持低优先级，不要顺手"修好"它。**
@@ -232,21 +248,23 @@
 
 ## Known Issues
 
-### 🔴 阻塞交付
+### 🔴 交付前置（P0，必须先做）
 
-1. **18 张教学图片资源 100% 缺失。** JSON 中每个 variant 声明 3 张图（`positionImageName` / `aimImageName` / `resultImageName`），3 组 × 2 方案 × 3 张 = 18 个资源名，**在 `Assets.xcassets` 中一个都不存在**。界面因此显示 `PreviewPlaceholderView` 占位。
-   现有 imageset 只有 2 个：`mirage_map`、`creator_avatar`。
-2. **`AppIcon.appiconset/Contents.json` 无 `filename` 字段** → 没有实际 App 图标（只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`）。
-3. **`AccentColor.colorset/Contents.json` 无颜色值** → Accent Color 未生效（`colors` 数组只有 `{idiom: universal}`）。
+1. **`AppIcon.appiconset/Contents.json` 无 `filename` 字段** → 没有实际 App 图标（只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`）。上架硬前置，**当前最高优先级**（`## Next` P0-1）。
+2. **`AccentColor.colorset/Contents.json` 无颜色值** → Accent Color 未生效（`colors` 数组只有 `{idiom: universal}`）。
+   - 连带效应：`AppTheme.accent = Color.accentColor`，被 `UtilityBadge.side` / `.category`、`FilterChip` 选中态、`ClusterPoint` 背景共用——**当前实际渲染为系统默认蓝**；配置颜色后这些位置会整体变色，需回归确认（尤其深色模式）。
 
 ### 🟠 数据与内容
 
+3. **18 张教学图片资源 100% 缺失。** JSON 中每个 variant 声明 3 张图（`positionImageName` / `aimImageName` / `resultImageName`），3 组 × 2 方案 × 3 张 = 18 个资源名，**在 `Assets.xcassets` 中一个都不存在**。界面因此显示 `PreviewPlaceholderView` 占位。
+   现有 imageset 只有 2 个：`mirage_map`、`creator_avatar`。
+   - **严重度已下调（2026-09-16）**：真实教学截图允许继续使用占位图，**此项不阻塞交付**，属 P1 内容填充任务（`## Next` P1-10）。
 4. **当前 Mirage 内容是占位/示例数据**，不得描述为"已核实的真实道具数据"：数值坐标为手工挑选、教学图片不存在、内容未与真实游戏对拍、JSON 中没有任何来源或可信度标记字段。
 5. 内容覆盖极小：仅 **3 个道具组 / 6 个投掷方案，全部为 T 方 Smoke**。Flash / Molotov / HE 三类道具与 B 包点、CT 方两个分类在代码中已支持但数据为空。
 6. **JSON 加载失败是"静默失败"（已确认不是最终设计）。** `LineupStore` 在 JSON 缺失或解码失败时回退到空 `Map`，`catch` 块为空——用户只看到空列表，没有任何错误提示。
    - 保留 fallback 以防止 App crash 没有问题；**要改的是"静默"**。
    - 后续优化方向：**Debug 环境**输出明确的 JSON decode / load 错误；**Release / UI 层**显示合理的 empty state；不通过静默 fallback 长期掩盖数据错误。
-   - 详见 `## Next` P1 第 7 项。测试资源目录 `Data/` 下只有 `lineups_mirage.json`（V1 只支持 Mirage 是刻意设计）。
+   - 详见 `## Next` P1 第 4 项。测试资源目录 `Data/` 下只有 `lineups_mirage.json`（V1 只支持 Mirage 是刻意设计）。
 7. 无 JSON 校验、无 ID 唯一性检查、无坐标范围检查、无图片资源存在性检查。
 
 ### 🟡 代码债
@@ -259,9 +277,9 @@
 
 ### 🔵 文档与工程
 
-13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，后续进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 95 个，差 34 个（搜索、收藏、设置、空状态相关）；该文档也未提及 V1 范围硬约束。
-    - **本轮决定：暂不补齐**，不做零散修补，统一留给一次专项 audit 处理。
-    - **不要为了补清单而改动 App 功能。** 详见 `## Next` P0 第 3 项。
+13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 95 个，差 34 个（搜索、收藏、设置、空状态相关）；该文档也未提及 V1 范围硬约束。
+    - 已排为 **P0-3**：目标是**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
+    - **约束：不要为了补 key 而重构 App。** 详见 `## Next` P0 第 3 项。
 14. `README.md` 定位已明确：**只用于面向开发者/用户描述项目，不作为 AI 进度日志**，详细进度只放在本文件（`PROJECT_STATUS.md`）。
     - 当前内容**已过期**：仍写"1 张地图 / 10 个静态道具点 / 每个 lineup 一个详情页"，与实际的 3 组 / 6 方案 + 搜索 + 收藏 + 本地化 + 开发者模式不符。
     - 但 `README.md` **是已跟踪文件**，修改它会越过本轮"只提交交接文档"的边界 → 本轮未改，已登记为 `## Next` P0 第 4 项。
@@ -306,33 +324,64 @@
 - ❌ 未修改 `README.md`、`CODEX.md`、`docs/LOCALIZATION.md`。
 - ❌ 未 `git add` / 提交两个工程文件噪声，未还原任何现有改动。
 
-**提交**：本次以 `Add shared agent handoff documentation` 为信息，**仅提交** `AGENTS.md` 与 `PROJECT_STATUS.md` 两个新文件（父提交为 `737fdaf`）。
+**提交**：本次以 `Add shared agent handoff documentation` 为信息，**仅提交** `AGENTS.md` 与 `PROJECT_STATUS.md` 两个新文件（父提交为 `737fdaf`）。该提交已 push 到 `origin/main`，本地 `main` 与远端同步。
 
 **验证**：`xcodebuild -project CSTacticsApp.xcodeproj -scheme CSTacticsApp -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug build` → `** BUILD SUCCEEDED **`。改动仅限两个 Markdown 交接文件，App 代码零改动。
+
+**后续修订（2026-09-16，仅文档）**：根据"真实教学截图允许继续使用占位图"的决定，**重新排定了 `## Next` 的优先级**：
+
+- P0-1 从"补齐 18 张教学图片"改为"**配置正式 App Icon 与 Accent Color**"。
+- 新增 P0-2"**对当前 V1 做一次完整产品流程检查**"（10 个面：Mirage 首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换；只检查现有实现与明显问题，不新增大功能）。
+- P0-3 由"暂不补齐 key"改为"**做专项 localization audit，修正文档与实际 key 的差异**"，并明确**不要为了补 key 重构 App**。
+- "补齐 18 张教学图片"与"录入真实 Mirage 道具数据"合并降级为 **P1 内容填充任务**（P1-9 / P1-10），明确**不阻塞交付**。
+- 本轮**只改本文件**；未修改 App 功能代码，未修改 `AGENTS.md`（其中 §5 教学图说明与 §11 文档索引的措辞仍按上一版，可择机同步）。
 
 ## Next Agent Handoff
 
 ### 当前基线
 
-- 分支 `main`：交接文档提交（`Add shared agent handoff documentation`）的父提交为 `737fdaf`；相对 `origin/main` **领先 1 个提交，尚未 push**。
-- 工作区：2 个 modified 的工程文件噪声（`project.pbxproj`、`CSTacticsApp.xcscheme`，Xcode 27 升级产物，**故意未提交**）+ 1 个未跟踪文件 `CODEX.md`；**没有半成品功能代码**。
+- 分支 `main`：与 `origin/main` **完全同步**。交接文档提交（`Add shared agent handoff documentation`，父提交 `737fdaf`）已 push 到远端。工作区没有未推送的提交。
+- 工作区：2 个 modified 的工程文件噪声（`project.pbxproj`、`CSTacticsApp.xcscheme`，Xcode 27 升级产物，**故意未提交**）+ 1 个未跟踪文件 `CODEX.md`（纳管与否待定）；**没有半成品功能代码**。
 - 构建命令见 `AGENTS.md` 第 8 节，当前为 `BUILD SUCCEEDED`。
 
-### 建议的下一个任务：补齐 18 张教学图片资源
+### 建议的下一个任务：配置正式 App Icon 与 Accent Color（P0-1）
 
-**为什么是它**：功能已经闭环，唯一的硬缺口是资源。教学图缺失直接让"截图教学"这一 V1 核心体验塌陷——每个方案详情页的全屏预览目前都只显示占位图。
+**为什么是它**：它是上架与观感的硬前置条件，成本极低，且**不需要改任何 Swift 代码**——目前"有 App 但没有图标"是交付上最说不通的一处缺口。
 
 **第一步的具体动作**：
 
-1. 只做 `mirage_window_smoke` 这一个道具组的 **2 个方案 × 3 张 = 6 张图**，或更小步：先做 `mirage_window_smoke_standard_t_spawn` 的 3 张（站位 / 瞄点 / 结果）。
-2. 在 `CSTacticsApp/Assets.xcassets/` 下新增 imageset，**资源名必须与 JSON 中声明的名字逐字一致**（拼错不会报错，只会继续显示占位图）：
-   - `mirage_window_smoke_position` / `mirage_window_smoke_aim` / `mirage_window_smoke_result`
-   - `mirage_window_smoke_left_spawn_position` / `..._aim` / `..._result`
-3. 在模拟器里实机确认 `LineupDetailView` 的折叠区、全屏分页预览、图片缩放三处链路都从占位图切换成真实图片，**再批量推进剩余 5 个变体**。
+1. 放入一张 1024×1024 的 App Icon（`CSTacticsApp/Assets.xcassets/AppIcon.appiconset/`），并在该目录 `Contents.json` 的 images 条目里补上 `"filename"` 字段（当前只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`，无 `filename`）。
+2. 在 `AccentColor.colorset/Contents.json` 里填入实际颜色值（当前 `colors` 数组只有 `{idiom: universal}`，所以 Accent Color 未生效）。
+3. 注意副作用：`AppTheme.accent = Color.accentColor`，而 `UtilityBadge.side` / `.category` 与 `FilterChip` 的选中态、`ClusterPoint` 背景色都在用它。**当前实际渲染为系统默认蓝**，配置后会整体变色——请在模拟器里确认这些位置仍然可读（尤其深色模式）。
+4. 完成后跑一次构建、在模拟器里核对，并更新本文件。
 
-**完整资源清单**（6 个前缀 × `_position` / `_aim` / `_result` = 18 个）：
+### 紧随其后：V1 完整产品流程检查（P0-2）
 
-| 道具组 | 变体 | 资源名前缀 |
+**为什么是它**：资源和文档的问题已经梳理清楚，接下来应该确认"现有实现到底能不能走通"，而不是继续加功能。
+
+**逐项走查清单**（10 个面，只检查现有实现与明显问题，**不新增大功能**）：
+
+Mirage 首页 → 2D 地图 → 道具列表 → 搜索 → 收藏 → LineupGroup → LineupVariant → 教学图片占位 → About → 中英切换
+
+**检查要点**：
+
+- 每个入口都能正常进入并返回，导航栈不重复、不卡死。
+- 空状态正确：搜索无结果、无收藏、过滤后无点位（地图上会叠 `EmptyStateView`）都要显示合理提示，而不是空白。
+- **中英两档都过一遍**（设置里切换），确认没有硬编码文案漏出、没有中英串台。
+- 深色模式下文本与徽章可读。
+- **已知可接受项**：教学图片显示占位图属预期行为（真实截图尚未就绪），**不要记为新缺陷**。
+- 发现的问题分两类处理：**明显问题可当场修**；**属于新功能的只登记进本文件的 `## Next`**，不在本轮实现。
+
+### 再之后：专项 localization audit（P0-3）
+
+对齐 `docs/LOCALIZATION.md` 与实际 `L10n.Key`（登记 61 / 实际 95，差 34 个）。**只改文档，不要为了补 key 重构 App。**
+
+### 内容填充任务（P1，不阻塞交付）
+
+- **录入真实 Mirage 道具数据**（取代当前占位/示例数据），并记录来源与核验方式。
+- **补齐 18 张教学图片**：真实截图就绪前**占位图可以继续使用**。资源名清单见下（需要时再查）。
+
+| 道具组 | 变体 | 资源名前缀（后缀 `_position` / `_aim` / `_result`） |
 |---|---|---|
 | `mirage_window_smoke` | `mirage_window_smoke_standard_t_spawn` | `mirage_window_smoke` |
 | | `mirage_window_smoke_left_spawn` | `mirage_window_smoke_left_spawn` |
@@ -341,20 +390,17 @@
 | `mirage_jungle_smoke` | `mirage_jungle_smoke_a_ramp` | `mirage_jungle_smoke` |
 | | `mirage_jungle_smoke_palace` | `mirage_jungle_smoke_palace` |
 
-**必须注意**：
+**做图片时必须注意**：
 
-- 这不是改代码，只是新增资源目录；但**新增完毕后要确认 `.xcodeproj` 的 Resources 阶段仍正常**（asset catalog 是整目录引用，通常无需改 pbxproj，改完请验证构建）。
-- **图片的来源与授权必须先确认**（见 Known Issues 第 18 条）。转发他人游戏截图有版权风险；若是自截图，建议在本文件记录来源与日期。这个决定直接影响 V1 能否发布，**不要跳过**。
-- 完成后更新本文件，并按"一个任务一个 commit"提交。
-
-### 备选任务（如果暂时拿不到图片）
-
-- **配置 App Icon 与 Accent Color**（成本极低、观感收益直接）。
-- **更新 `README.md`**：只做最小必要更新，使其与真实状态（3 组 / 6 方案 + 搜索 + 收藏 + 开发者模式）一致，**不要写成进度日志**。
-- **专项 localization audit**（对齐 `LOCALIZATION.md` 与实际的 34 个 key 差异）。
+- 在 `CSTacticsApp/Assets.xcassets/` 下新增 imageset，**资源名必须与 JSON 中声明的名字逐字一致**（拼错不会报错，只会继续显示占位图）。
+- 建议先做 3 张打通链路（`mirage_window_smoke_standard_t_spawn` 的站位 / 瞄点 / 结果），在模拟器里确认 `LineupDetailView` 的折叠区、全屏分页预览、图片缩放三处都换成真图，再批量推进剩余 5 个变体。
+- 新增完毕后确认 `.xcodeproj` 的 Resources 阶段仍正常（asset catalog 是整目录引用，通常无需改 pbxproj，但请验证构建）。
+- **图片的来源与授权必须先确认**（见 Known Issues 第 18 条）。转发他人游戏截图有版权风险；若是自截图，请在本文件记录来源与日期。**这是真正的前置条件，不是优先级问题。**
 
 ### 不要做的事
 
+- 不要在"产品流程检查"里夹带新功能；新需求只登记，不在本轮实现。
+- 不要为了补 localization key 而重构 App 或改动界面结构。
 - 不要顺手接入 `MapListView` 到根导航——**已确认刻意设计**，V1 只有一张地图；等开始加第二张地图时再提升优先级。
 - 不要给开发者模式的坐标拖动加写回逻辑。
 - 不要通过静默 fallback 长期掩盖 JSON 数据错误。
