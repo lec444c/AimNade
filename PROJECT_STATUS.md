@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-19
-> 任务前基线提交：`503d558`（`Configure Accent Color`，本地 `main`）
-> 最近一次构建验证：统一工程命名后执行 `xcodebuild` → **BUILD SUCCEEDED**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 任务前基线提交：`8bd1d58`（`Unify project naming as AimNade`，已推送至 `origin/main`）
+> 最近一次构建验证：配置 App Icon 后执行 Debug `xcodebuild` → **通过（exit 0）**（iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -22,7 +22,7 @@
 
 把 Mirage 单地图 MVP 从"功能可用"推进到"可交付"，**优先级已在 2026-09-16 修订**（真实教学截图允许继续使用占位图）：
 
-1. **配置正式 App Icon**（P0-1，当前最高优先级；Accent Color `#3A7AFE` 已完成）。
+1. **App Icon 与 Accent Color 已完成**（P0-1）；当前最高优先级为 P0-2 完整产品流程检查。
 2. **对当前 V1 做一次完整产品流程检查**（P0-2）：首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。只检查现有实现与明显问题，**不新增大功能**。
 3. **专项 localization audit**（P0-3）：修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
 4. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
@@ -86,6 +86,7 @@
 - `LanguageManager` 三档语言（跟随系统 / 简体中文 / 英文），`UserDefaults` 持久化；`L10n`（`L10n.Key` 95 个 case，中英双语分支齐全）+ `LocalizedText`（JSON 业务内容双语）。
 - `Theme/AppTheme.swift`：颜色、圆角、间距的唯一来源。
 - `AccentColor.colorset` 已配置通用 sRGB 品牌色 `#3A7AFE`；`AppTheme.accent` 继续使用 `Color.accentColor`。
+- `AppIcon.appiconset/AppIcon.png` 已接入用户提供的第一版图标：1024×1024、不含透明通道，保持原画面完整；使用通用外观，iPhone / iPad 图标资源已编译打包。
 - `Views/Components/`：`FeatureCard` / `MapMarkerView` / `UtilityBadge` 已抽出且在多个页面复用；`Views/EmptyStateView.swift` 统一空状态。
 - 复用核实：`MapMarkerView` 被 5 个文件引用，`UtilityBadge` 被 3 个，`EmptyStateView` 被 4 个，`AppTheme` 被 14 个。
 - 界面使用系统语义色，自带深色模式；关键按钮有 `accessibilityLabel`；`Views/` 下已无硬编码的固定 UI 文案（仅剩纯数字插值与已本地化的插值）。
@@ -103,7 +104,7 @@
 ```
 
 - 两个工程文件的未提交差异仅为 Xcode 27 升级元数据；名称统一所需内容已纳入本次提交。
-- `CODEX.md` 仍未被 git 跟踪，本轮只同步其中的路径和名称，不改变其纳管状态。
+- `CODEX.md` 仍未被 git 跟踪。
 - 没有改到一半的功能代码。
 
 ### 尚未收敛的能力缺口
@@ -117,15 +118,12 @@
 ## Next
 
 > 范围纪律：**V1 只做 Mirage**。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
-> **优先级已修订（2026-09-16）：真实教学截图允许继续使用占位图，因此"补齐 18 张教学图片"不再是最高优先级**，改为内容填充类收尾任务（见 P1-10）；当前最高优先级是 P0-1。
+> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1 已完成，当前最高优先级是 P0-2。
 > P0 的三项都属于"在当前实现上做检查或配置"，**不要因此新增大功能**。
 
 ### P0 — 交付前置与完整性确认
 
-1. **配置正式 App Icon**（当前最高优先级；Accent Color 已完成）。
-   - `AppIcon.appiconset/Contents.json` 无 `filename` → 没有实际图标。
-   - `AccentColor.colorset` 已配置为通用 sRGB `#3A7AFE` 并通过构建。
-   - App Icon 是上架与观感的硬前置，且**不需要改任何 Swift 代码**。
+1. ✅ **App Icon 与 Accent Color 已配置**：用户提供的第一版图标已接入 `AppIcon.appiconset`；Accent Color 为 `#3A7AFE`，构建通过。
 2. **对当前 V1 做一次完整产品流程检查**：只检查现有实现与明显问题，**不新增大功能**。
    - 逐项走查：Mirage 首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。
    - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
@@ -252,7 +250,7 @@
 
 ### 🔴 交付前置（P0，必须先做）
 
-1. **`AppIcon.appiconset/Contents.json` 无 `filename` 字段** → 没有实际 App 图标（只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`）。上架硬前置，**当前最高优先级**（`## Next` P0-1）。
+1. ✅ **App Icon 已配置**：`Contents.json` 引用 `AppIcon.png`（1024×1024，不含透明通道）；真机主屏幕观感随 P0-2 检查。
 2. ~~Accent Color 未配置~~ ✅ **已完成**：`AccentColor.colorset` 为通用 sRGB `#3A7AFE`。
 
 ### 🟠 数据与内容
@@ -295,6 +293,16 @@
 20. `AboutView` 显示的版本号来自 `Bundle.main` 的 `CFBundleShortVersionString`（缺失时回退 `"1.0"`）；而 App 名称走的是 `L10n` 常量而非 Bundle。是否统一为只读 Bundle 元数据，待确认。
 
 ## Last Work
+
+### 2026-09-19 — 配置第一版 App Icon
+
+- 来源：用户提供的 `aimnade第一版.png`（1254×1254 PNG、不含透明通道）。桌面原图保持不变。
+- 按完整画面等比例缩放为 1024×1024，保存为 `AimNade/Assets.xcassets/AppIcon.appiconset/AppIcon.png`，并在同目录 `Contents.json` 中配置 `filename`。
+- 复用现有 Target 的 `AppIcon` 引用；Swift、业务 JSON、本地化及工程配置均未修改。
+- 验证：Debug iPhone 17 模拟器构建通过（exit 0）；产物的 iPhone / iPad `CFBundleIcons` 指向 `AppIcon`，已生成对应图标文件。尚未进行真机主屏幕视觉验收。
+- 提交范围：图标 PNG、AppIcon 资源描述、项目状态文档；原有两个工程文件改动和未跟踪的 `CODEX.md` 保留。
+
+---
 
 ### 2026-09-19 — 统一 AimNade 工程命名
 
@@ -381,20 +389,11 @@
 
 ### 当前基线
 
-- 分支 `main`：本地包含 Accent Color 与工程命名统一两个提交，尚未 push，预计比 `origin/main` ahead 2。
+- 分支 `main`：Accent Color 与工程命名统一已推送；本轮 App Icon 配置作为独立本地提交，尚未 push。
 - 工作区保留 Xcode 27 升级元数据差异和未跟踪的 `CODEX.md`；没有半成品功能代码。
-- 新构建命令见 `AGENTS.md` 第 8 节；名称统一后已实测 `BUILD SUCCEEDED`（Xcode 27.0 / iPhone 17 + iOS 26.5 模拟器）。
+- 构建命令见 `AGENTS.md` 第 8 节；App Icon 配置后 Debug 构建通过（iPhone 17 + iOS 26.5 模拟器）。
 
-### 建议的下一个任务：配置正式 App Icon（P0-1）
-
-**为什么是它**：Accent Color 已完成；App Icon 仍是上架与观感的硬前置条件，且**不需要改任何 Swift 代码**。
-
-**第一步的具体动作**：
-
-1. 放入一张 1024×1024 的 App Icon（`AimNade/Assets.xcassets/AppIcon.appiconset/`），并在该目录 `Contents.json` 的 images 条目里补上 `"filename"` 字段（当前只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`，无 `filename`）。
-2. 完成后跑一次构建、在模拟器里核对，并更新本文件。
-
-### 紧随其后：V1 完整产品流程检查（P0-2）
+### 建议的下一个任务：V1 完整产品流程检查（P0-2）
 
 **为什么是它**：资源和文档的问题已经梳理清楚，接下来应该确认"现有实现到底能不能走通"，而不是继续加功能。
 
