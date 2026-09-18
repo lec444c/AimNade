@@ -1,9 +1,9 @@
 # AimNade Project Status
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
-> 最后更新：2026-09-16
-> 基线提交：`737fdaf`（`Add gitignore for Xcode project`，分支 `main`，与 `origin/main` 同步）
-> 验证方式：全量阅读仓库源码 + 实际执行 `xcodebuild` 构建 → **BUILD SUCCEEDED**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 最后更新：2026-09-19
+> 基线提交：`2209af3`（`Update AimNade project priorities`，分支 `main`，与 `origin/main` 同步）
+> 最近一次构建验证：在 `737fdaf` 上全量阅读仓库源码 + 实际执行 `xcodebuild` 构建 → **BUILD SUCCEEDED**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -90,19 +90,14 @@
 
 ## In Progress
 
-### 工作区未提交改动（均为非功能改动）
+### 工作区状态
 
-```
- M CSTacticsApp.xcodeproj/project.pbxproj
- M CSTacticsApp.xcodeproj/xcshareddata/xcschemes/CSTacticsApp.xcscheme
-?? AGENTS.md
-?? CODEX.md
-?? PROJECT_STATUS.md
-```
+从 `origin/main` 的 `2209af3` 重新克隆出来的工作副本，**工作区干净、无未提交改动、无未跟踪文件**。
 
-- `project.pbxproj` / `.xcscheme` 的 diff **全部是 Xcode 27 打开工程产生的升级噪声**：`LastUpgradeCheck` 1500→2700、`LastUpgradeVersion` 1500→2700、新增 `STRING_CATALOG_GENERATE_SYMBOLS = YES` 与 `CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES`、`Localization` group 与 `PBXVariantGroup` 段落顺序调整。**未改动任何 App 行为。**
-- 三个 Markdown 交接/说明文档**均未被 git 跟踪**，有丢失风险，建议纳入版本控制。
-- 结论：没有"改到一半的功能代码"，当前是**干净的功能基线 + 待整理的工程文件与文档**。
+- `project.pbxproj` 在 `HEAD` 中仍为 `LastUpgradeCheck = 1500`：Xcode 27 的升级噪声（`2700`）**从未进入版本库**，当前基线不含该噪声。
+- `AGENTS.md` / `PROJECT_STATUS.md` 已在 `85439c9` 纳入 git（该提交只含这两个文件）。
+- `CODEX.md` **不在任何提交中**，只存在于维护者的本地工作副本，因此重新克隆**不会得到该文件**。
+- 结论：没有"改到一半的功能代码"，当前是**干净的功能基线**。
 
 ### 尚未收敛的能力缺口
 
@@ -145,8 +140,7 @@
    - 最低要求：在文档与提交信息中持续明确标注。
    - 可选增强：为模型增加可选字段（如 `isPlaceholder`）并在 UI 上显示提示——**属于数据模型变更，需先确认再动手**（见 Known Issues 的待确认项）。
 6. 数据校验：ID 唯一性、坐标范围、图片资源存在性。
-7. **更新 `README.md`**：它只用于面向开发者/用户描述项目，**不作为 AI 进度日志**；详细进度只放在本文件。当前 README 仍写"1 张地图 / 10 个静态道具点"，与真实状态不符。
-   - 它属已跟踪文件，此前几轮边界是"只提交交接文档"，故一直未改。
+7. ~~**更新 `README.md`**~~ ✅ **已完成（2026-09-19）**：README 已重写，仍只用于面向开发者/用户描述项目，**不作为 AI 进度日志**；详细进度只放在本文件。原"1 张地图 / 10 个静态道具点"等过时描述已全部替换。
 8. 扩充 Mirage 内容：先补 B 包点、CT 方两个空洞分类，再补 Flash / Molotov / HE。**扩充前必须先确定真实数据来源与核验方式**（见 Next Agent Handoff 的风险项）。
 9. **录入真实 Mirage 道具数据**：取代当前占位/示例数据，并记录来源与核验方式。
 10. **补齐 18 张教学图片**（**已降级为内容填充收尾任务**，2026-09-16 决定）：真实教学截图尚未就绪期间，**占位图可以继续使用，不阻塞交付**。
@@ -280,9 +274,8 @@
 13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 95 个，差 34 个（搜索、收藏、设置、空状态相关）；该文档也未提及 V1 范围硬约束。
     - 已排为 **P0-3**：目标是**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
     - **约束：不要为了补 key 而重构 App。** 详见 `## Next` P0 第 3 项。
-14. `README.md` 定位已明确：**只用于面向开发者/用户描述项目，不作为 AI 进度日志**，详细进度只放在本文件（`PROJECT_STATUS.md`）。
-    - 当前内容**已过期**：仍写"1 张地图 / 10 个静态道具点 / 每个 lineup 一个详情页"，与实际的 3 组 / 6 方案 + 搜索 + 收藏 + 本地化 + 开发者模式不符。
-    - 但 `README.md` **是已跟踪文件**，修改它会越过本轮"只提交交接文档"的边界 → 本轮未改，已登记为 `## Next` P0 第 4 项。
+14. ~~`README.md` 内容过期~~ ✅ **已修复（2026-09-19）**：README 已重写为与当前实现一致的简短项目描述（3 组 / 6 方案、2D 地图与聚类、搜索、收藏、详情页、中英双语、开发者模式、占位数据声明、运行与构建方式），并已移除"1 张地图 / 10 个静态道具点"的过时描述。
+    - 定位不变：`README.md` **只用于面向开发者/用户描述项目，不作为 AI 进度日志**，详细进度只放在本文件（`PROJECT_STATUS.md`）。
 15. `AGENTS.md` 与 `PROJECT_STATUS.md` 在本轮之前**均未被 git 跟踪**，有丢失风险；本轮已提交纳入（见 `## Last Work`）。
     - `CODEX.md` **仍未被跟踪**：它属于既有的项目说明书，不属于本轮交接文档范围，本轮未提交、未修改。
 16. **Bundle Identifier 仍是模板默认值 `com.example.CSTacticsApp`**，未改成正式域名，**上架前必须修改**。
@@ -295,6 +288,30 @@
 20. `AboutView` 显示的版本号来自 `Bundle.main` 的 `CFBundleShortVersionString`（缺失时回退 `"1.0"`）；而 App 名称走的是 `L10n` 常量而非 Bundle。是否统一为只读 Bundle 元数据，待确认。
 
 ## Last Work
+
+### 2026-09-19 — 刷新 `README.md`（在 PR 分支上，未进 `main`）
+
+**任务**：把已过期的 `README.md` 重写为与当前实现一致的简短项目描述，并按交接义务同步本文件。
+
+**做了**：
+
+- **重写 `README.md`**：产品名 `AimNade`（并说明 Xcode 工程名仍是历史名 `CSTacticsApp`）、功能清单（2D 地图与聚类缩放 / 道具列表 / 搜索 / 收藏 / 详情页 / 中英双语 / 开发者模式）、V1 范围（只做 Mirage）、运行与构建方式、以及 `AGENTS.md` / `PROJECT_STATUS.md` / `docs/LOCALIZATION.md` 的索引。
+- 新增内容**逐条对照源码核实**，没有沿用旧描述：道具组 / 方案数量读自 `Data/lineups_mirage.json`（3 组 / 6 方案），聚类与双击缩放确认存在于 `Views/TacticalMapView.swift`，`Assets.xcassets` 下确认只有 `mirage_map` / `creator_avatar` 两个 imageset，文案措辞对照 `Localization/L10n.swift`（`appIntro` / `unofficialNoticeText`）。
+- 按 `AGENTS.md` 第 5 节要求，在 README 中**显式标注当前道具数据为占位内容**，并保留"非官方"表述。
+- 同步本文件四处：`## In Progress` 的工作区状态、`## Known Issues` 第 14 条、`## Next` 的 P1 第 7 项、`## Next Agent Handoff` 的当前基线。
+
+**没有做**：
+
+- ❌ 未修改任何 `.swift` / `.json` / `.pbxproj` / `.xcscheme` / `Assets` 内容。
+- ❌ 未改 `AGENTS.md`、`docs/LOCALIZATION.md`、`CODEX.md`。
+
+**提交**：分支 `docs/refresh-readme`，以 PR 形式提交，**未直接推送 `main`**；`main` 仍停在 `2209af3`。
+
+**验证**：改动为纯文档。**本机为 Windows，没有 Xcode，未执行 `xcodebuild`**；App 代码零改动，`737fdaf` 的 `BUILD SUCCEEDED` 基线仍适用，但**尚未在 Mac 上重新确认**。
+
+---
+
+### 2026-09-16 — 建立共用交接机制
 
 **任务**：全面复核仓库真实状态，建立 Codex 与 DSH 共用的项目交接机制，并按确认的 5 项决定收尾。
 
@@ -340,9 +357,10 @@
 
 ### 当前基线
 
-- 分支 `main`：与 `origin/main` **完全同步**。交接文档提交（`Add shared agent handoff documentation`，父提交 `737fdaf`）已 push 到远端。工作区没有未推送的提交。
-- 工作区：2 个 modified 的工程文件噪声（`project.pbxproj`、`CSTacticsApp.xcscheme`，Xcode 27 升级产物，**故意未提交**）+ 1 个未跟踪文件 `CODEX.md`（纳管与否待定）；**没有半成品功能代码**。
-- 构建命令见 `AGENTS.md` 第 8 节，当前为 `BUILD SUCCEEDED`。
+- 分支 `main`：与 `origin/main` **完全同步**，停在 `2209af3`（`Update AimNade project priorities`）。
+- **有一个待审 PR**：分支 `docs/refresh-readme`，只改 `README.md` 与本文件（见 `## Last Work` 的 2026-09-19 条目）。合并前**不要**在该分支上继续叠加无关改动。
+- `main` 工作区干净，无未提交改动、无未跟踪文件；`project.pbxproj` 中 `LastUpgradeCheck = 1500`，基线不含 Xcode 27 升级噪声。`CODEX.md` 不在版本库中，重新克隆不会得到它。
+- 构建命令见 `AGENTS.md` 第 8 节；最近一次实测 `BUILD SUCCEEDED` 在 `737fdaf`（Xcode 27.0 / iPhone 17 + iOS 26.5 模拟器）。
 
 ### 建议的下一个任务：配置正式 App Icon 与 Accent Color（P0-1）
 
