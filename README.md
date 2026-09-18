@@ -6,8 +6,7 @@ position, the aim point, and the result.
 
 Everything ships inside the app: no network access, no account, no backend.
 
-> The Xcode project and target are still named `CSTacticsApp` for historical reasons.
-> `AimNade` is the display name shown on the device.
+The Xcode project, target, scheme, build product, and on-device display name are all `AimNade`.
 
 ## What it does
 
@@ -21,7 +20,7 @@ Everything ships inside the app: no network access, no account, no backend.
 - **Two languages** — Simplified Chinese and English, plus a "follow system" option.
 - **Developer mode** — overlay, drag, and copy map coordinates while laying out new content.
 
-All content lives in `CSTacticsApp/Data/lineups_mirage.json` and is loaded by `LineupStore`.
+All content lives in `AimNade/Data/lineups_mirage.json` and is loaded by `LineupStore`.
 
 ## Status
 
@@ -43,12 +42,12 @@ repository are in [`AGENTS.md`](AGENTS.md).
 
 ## Running it
 
-Open `CSTacticsApp.xcodeproj` in Xcode, pick a simulator, and run.
+Open `AimNade.xcodeproj` in Xcode, pick a simulator, and run.
 
 Or from the command line:
 
 ```bash
-xcodebuild -project CSTacticsApp.xcodeproj -scheme CSTacticsApp \
+xcodebuild -project AimNade.xcodeproj -scheme AimNade \
   -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug build
 ```
 

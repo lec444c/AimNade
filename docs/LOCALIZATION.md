@@ -1,8 +1,8 @@
-# CSTacticsApp 本地化开发规范
+# AimNade 本地化开发规范
 
 ## 支持语言
 
-CSTacticsApp 支持 English 和简体中文。用户选择语言由 `LanguageManager` 管理，页面显示文本统一通过 `L10n.text(_:for:)` 读取。
+AimNade 支持 English 和简体中文。用户选择语言由 `LanguageManager` 管理，页面显示文本统一通过 `L10n.text(_:for:)` 读取。
 
 ## UI 文本规则
 

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct CSTacticsAppApp: App {
+struct AimNadeApp: App {
     @StateObject private var languageManager = LanguageManager()
     @StateObject private var developerSettings = DeveloperSettings()
     @StateObject private var favoriteStore = FavoriteStore()

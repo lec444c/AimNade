@@ -10,9 +10,9 @@
 
 ## 1. 项目身份
 
-- **项目名 / 产品名**：AimNade。显示名由 `CSTacticsApp/en.lproj/InfoPlist.strings` 与 `CSTacticsApp/zh-Hans.lproj/InfoPlist.strings` 的 `CFBundleDisplayName` 决定（当前两处均为 `AimNade`），`project.pbxproj` 中另有 `INFOPLIST_KEY_CFBundleDisplayName = AimNade`。
-- **Xcode 工程 / Target 名**：`CSTacticsApp`（历史名称，**不要**为了"改名"而大规模重命名）。
-- **仓库根目录**：本文件所在目录（`My-First-IOS-App/`），也是 git toplevel。Swift 源码在子目录 `CSTacticsApp/`。
+- **项目名 / 产品名**：AimNade。显示名由 `AimNade/en.lproj/InfoPlist.strings` 与 `AimNade/zh-Hans.lproj/InfoPlist.strings` 的 `CFBundleDisplayName` 决定（当前两处均为 `AimNade`），`project.pbxproj` 中另有 `INFOPLIST_KEY_CFBundleDisplayName = AimNade`。
+- **Xcode 工程 / Target / Scheme 名**：`AimNade`。
+- **仓库根目录**：本文件所在目录，也是 git toplevel。Swift 源码在子目录 `AimNade/`。
 - **定位**：Counter-Strike 战术道具（lineup）学习类 iOS App。本地数据驱动，无网络、无账号、无后端。
 
 ## 2. 技术栈
@@ -20,7 +20,7 @@
 - **语言 / UI**：Swift 5 + SwiftUI。
 - **最低版本**：iOS 17.0（`IPHONEOS_DEPLOYMENT_TARGET = 17.0`）。
 - **设备**：iPhone + iPad（`TARGETED_DEVICE_FAMILY = "1,2"`）。
-- **工程形态**：纯 `.xcodeproj`，**单一 target `CSTacticsApp`**。
+- **工程形态**：纯 `.xcodeproj`，**单一 target `AimNade`**。
 - **第三方依赖**：**零**（无 SPM / CocoaPods / Carthage）。不要引入依赖，除非需求明确要求。
 - **UIKit**：仅用于 SwiftUI 无法合理覆盖的场景，通过 `UIViewRepresentable` 接入——地图缩放、教学图片缩放、剪贴板导出。
 - **持久化**：仅 `UserDefaults`（语言偏好、收藏 ID、开发者模式开关）。不引入数据库。
@@ -67,8 +67,8 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 
 ## 5. 数据规则
 
-- **唯一内容数据源**：`CSTacticsApp/Data/lineups_mirage.json`，由 `LineupStore` 从 App Bundle 读取。
-- JSON 结构必须与 `CSTacticsApp/Models/LineupModels.swift` 中的 `Map` / `LineupGroup` / `LineupVariant` 保持一致（`Codable`，字段名必须逐字匹配，缺失的可选字段会导致解码整体失败）。
+- **唯一内容数据源**：`AimNade/Data/lineups_mirage.json`，由 `LineupStore` 从 App Bundle 读取。
+- JSON 结构必须与 `AimNade/Models/LineupModels.swift` 中的 `Map` / `LineupGroup` / `LineupVariant` 保持一致（`Codable`，字段名必须逐字匹配，缺失的可选字段会导致解码整体失败）。
 - 改动数据后必须检查：**ID 唯一性**、坐标取值范围（`0…1` 归一化）、枚举取值（`UtilityType` / `LineupCategory` / `difficulty`）、以及引用的图片资源名是否真实存在。
 - `LineupStore` 在 JSON 缺失或解码失败时会**静默回退为空 `Map`，不会向用户报错**。改动 JSON 后必须在 App 内确认内容可见，**不能只看构建是否通过**。
   - 保留 fallback 以防止 App crash 是可以接受的；**但"静默失败"不是最终设计**（已确认的决定）。改进方向：Debug 环境输出明确的 JSON decode / load 错误，Release / UI 层显示合理的 empty state。**不要通过静默 fallback 长期掩盖数据错误**，也不要把它当作已完成的错误处理。
@@ -107,17 +107,17 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 - 开发者模式中的坐标拖动**只存在于页面 `@State` 中**，不会写回 JSON。不要把它当作已持久化数据，**也不要擅自为它添加写回逻辑**。
 - 保持本地优先设计：不引入网络、账号、数据库或第三方依赖。
 - 不要继续把不相关职责堆进单个巨型 View。`Views/TacticalMapView.swift`（1114 行，内含 17 个内部类型）已知需要拆分，**新增逻辑优先考虑独立组件**。
-- `Views/MapListView.swift` 已实现但**未接入根导航**；`CSTacticsAppApp.swift` 的 `NavigationStack` 直接进入 `MirageDetailView`。**这是已确认的刻意设计**（V1 只做 Mirage，用户不需要地图列表前置）。**不要顺手"修好"它**；只有任务明确要求"开始增加第二张地图"时才提升优先级。
+- `Views/MapListView.swift` 已实现但**未接入根导航**；`AimNadeApp.swift` 的 `NavigationStack` 直接进入 `MirageDetailView`。**这是已确认的刻意设计**（V1 只做 Mirage，用户不需要地图列表前置）。**不要顺手"修好"它**；只有任务明确要求"开始增加第二张地图"时才提升优先级。
 
 ## 8. 常用命令
 
 ```bash
 # 构建（当前基线是 BUILD SUCCEEDED）
-xcodebuild -project CSTacticsApp.xcodeproj -scheme CSTacticsApp \
+xcodebuild -project AimNade.xcodeproj -scheme AimNade \
   -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug build
 
 # 查看可用模拟器
-xcodebuild -project CSTacticsApp.xcodeproj -scheme CSTacticsApp -showdestinations
+xcodebuild -project AimNade.xcodeproj -scheme AimNade -showdestinations
 ```
 
 改动后至少跑一次构建命令；由于没有测试，构建通过是当前唯一可自动化的验证手段。
@@ -126,7 +126,7 @@ xcodebuild -project CSTacticsApp.xcodeproj -scheme CSTacticsApp -showdestination
 
 ## 9. 工程文件注意事项
 
-用新版 Xcode 打开工程会自动改写 `CSTacticsApp.xcodeproj/project.pbxproj`（`LastUpgradeCheck`、`LastUpgradeVersion`、`STRING_CATALOG_GENERATE_SYMBOLS`、`CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED`，以及 group / `PBXVariantGroup` 段落顺序）。这类改动与功能无关。提交前请确认 diff 只包含你真正想提交的内容，**不要把无关的工程文件抖动混进功能提交**。
+用新版 Xcode 打开工程会自动改写 `AimNade.xcodeproj/project.pbxproj`（`LastUpgradeCheck`、`LastUpgradeVersion`、`STRING_CATALOG_GENERATE_SYMBOLS`、`CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED`，以及 group / `PBXVariantGroup` 段落顺序）。这类改动与功能无关。提交前请确认 diff 只包含你真正想提交的内容，**不要把无关的工程文件抖动混进功能提交**。
 
 ## 10. 完成任务后的交接义务
 

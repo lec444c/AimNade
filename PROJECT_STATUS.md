@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-19
-> 基线提交：`2209af3`（`Update AimNade project priorities`，分支 `main`，与 `origin/main` 同步）
-> 最近一次构建验证：在 `737fdaf` 上全量阅读仓库源码 + 实际执行 `xcodebuild` 构建 → **BUILD SUCCEEDED**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 任务前基线提交：`503d558`（`Configure Accent Color`，本地 `main`）
+> 最近一次构建验证：统一工程命名后执行 `xcodebuild` → **BUILD SUCCEEDED**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|---|
 | Marketing Version | `1.0` | `project.pbxproj` 的 `MARKETING_VERSION` |
 | Build Version | `1` | `project.pbxproj` 的 `CURRENT_PROJECT_VERSION` |
-| Bundle Identifier | `com.example.CSTacticsApp` | `project.pbxproj`（**仍是模板默认值，未改成正式域名**，见 Known Issues） |
+| Bundle Identifier | `com.example.AimNade` | `project.pbxproj`（**仍是模板默认值，未改成正式域名**，见 Known Issues） |
 | 显示名 | `AimNade` | `en.lproj` / `zh-Hans.lproj` 的 `CFBundleDisplayName` |
 | Deployment Target | iOS 17.0 | `IPHONEOS_DEPLOYMENT_TARGET` |
 | 阶段 | Mirage 单地图 MVP，功能闭环；**内容与资源缺口是当前唯一的主要短板** | 本文件第 2–4 节 |
@@ -22,7 +22,7 @@
 
 把 Mirage 单地图 MVP 从"功能可用"推进到"可交付"，**优先级已在 2026-09-16 修订**（真实教学截图允许继续使用占位图）：
 
-1. **配置正式 App Icon 与 Accent Color**（P0-1，当前最高优先级）。
+1. **配置正式 App Icon**（P0-1，当前最高优先级；Accent Color `#3A7AFE` 已完成）。
 2. **对当前 V1 做一次完整产品流程检查**（P0-2）：首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。只检查现有实现与明显问题，**不新增大功能**。
 3. **专项 localization audit**（P0-3）：修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
 4. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
@@ -36,10 +36,11 @@
 
 ### 工程基线
 
-- 单一 target `CSTacticsApp`（`productType = com.apple.product-type.application`），纯 `.xcodeproj`。
+- 单一 target `AimNade`（`productType = com.apple.product-type.application`），纯 `.xcodeproj`。
+- 工程、Target、Scheme、构建产物、源码目录和 `@main` 入口均统一命名为 `AimNade`。
 - Swift 5 + SwiftUI，iOS 17.0，设备族 `1,2`（iPhone + iPad）。
 - **零第三方依赖**（无 SPM / CocoaPods / Carthage），**无测试 target**。
-- `xcodebuild ... build` 实测 `BUILD SUCCEEDED`；构建产物 `CSTacticsApp.app` 内确认打包了 `lineups_mirage.json`、`Assets.car`、`en.lproj`、`zh-Hans.lproj`。
+- `xcodebuild ... build` 实测 `BUILD SUCCEEDED`；构建产物 `AimNade.app` 内确认打包了 `lineups_mirage.json`、`Assets.car`、`en.lproj`、`zh-Hans.lproj`。
 - 全仓无 `TODO` / `FIXME` / `HACK` 遗留标记。
 
 ### 数据层与模型
@@ -84,6 +85,7 @@
 
 - `LanguageManager` 三档语言（跟随系统 / 简体中文 / 英文），`UserDefaults` 持久化；`L10n`（`L10n.Key` 95 个 case，中英双语分支齐全）+ `LocalizedText`（JSON 业务内容双语）。
 - `Theme/AppTheme.swift`：颜色、圆角、间距的唯一来源。
+- `AccentColor.colorset` 已配置通用 sRGB 品牌色 `#3A7AFE`；`AppTheme.accent` 继续使用 `Color.accentColor`。
 - `Views/Components/`：`FeatureCard` / `MapMarkerView` / `UtilityBadge` 已抽出且在多个页面复用；`Views/EmptyStateView.swift` 统一空状态。
 - 复用核实：`MapMarkerView` 被 5 个文件引用，`UtilityBadge` 被 3 个，`EmptyStateView` 被 4 个，`AppTheme` 被 14 个。
 - 界面使用系统语义色，自带深色模式；关键按钮有 `accessibilityLabel`；`Views/` 下已无硬编码的固定 UI 文案（仅剩纯数字插值与已本地化的插值）。
@@ -92,12 +94,17 @@
 
 ### 工作区状态
 
-从 `origin/main` 的 `2209af3` 重新克隆出来的工作副本，**工作区干净、无未提交改动、无未跟踪文件**。
+本次提交完成后，工作区仍保留以下既有非功能改动：
 
-- `project.pbxproj` 在 `HEAD` 中仍为 `LastUpgradeCheck = 1500`：Xcode 27 的升级噪声（`2700`）**从未进入版本库**，当前基线不含该噪声。
-- `AGENTS.md` / `PROJECT_STATUS.md` 已在 `85439c9` 纳入 git（该提交只含这两个文件）。
-- `CODEX.md` **不在任何提交中**，只存在于维护者的本地工作副本，因此重新克隆**不会得到该文件**。
-- 结论：没有"改到一半的功能代码"，当前是**干净的功能基线**。
+```text
+ M AimNade.xcodeproj/project.pbxproj
+ M AimNade.xcodeproj/xcshareddata/xcschemes/AimNade.xcscheme
+?? CODEX.md
+```
+
+- 两个工程文件的未提交差异仅为 Xcode 27 升级元数据；名称统一所需内容已纳入本次提交。
+- `CODEX.md` 仍未被 git 跟踪，本轮只同步其中的路径和名称，不改变其纳管状态。
+- 没有改到一半的功能代码。
 
 ### 尚未收敛的能力缺口
 
@@ -115,9 +122,10 @@
 
 ### P0 — 交付前置与完整性确认
 
-1. **配置正式 App Icon 与 Accent Color**（当前最高优先级）。
-   - `AppIcon.appiconset/Contents.json` 无 `filename` → 没有实际图标；`AccentColor.colorset/Contents.json` 无颜色值 → Accent Color 未生效。
-   - 上架与观感的硬前置，成本极低，且**不需要改任何 Swift 代码**。
+1. **配置正式 App Icon**（当前最高优先级；Accent Color 已完成）。
+   - `AppIcon.appiconset/Contents.json` 无 `filename` → 没有实际图标。
+   - `AccentColor.colorset` 已配置为通用 sRGB `#3A7AFE` 并通过构建。
+   - App Icon 是上架与观感的硬前置，且**不需要改任何 Swift 代码**。
 2. **对当前 V1 做一次完整产品流程检查**：只检查现有实现与明显问题，**不新增大功能**。
    - 逐项走查：Mirage 首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。
    - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
@@ -195,7 +203,7 @@
 
 ### 入口与导航
 
-- `CSTacticsApp/CSTacticsAppApp.swift` 是 `@main` 入口。
+- `AimNade/AimNadeApp.swift` 是 `@main` 入口。
 - 注入三个全局 `ObservableObject`：`LanguageManager`、`DeveloperSettings`、`FavoriteStore`。
 - 根导航：`NavigationStack` **直接进入 `MirageDetailView(map: LineupStore.mirageMap)`**，右上角齿轮进设置。
 - `Views/MapListView.swift` 已实现地图列表页（含自己的 `NavigationStack`），但**未接入启动流程**。全仓除 pbxproj 与文档外无任何引用。
@@ -216,7 +224,7 @@
 
 | 目录 | 文件 |
 |---|---|
-| 根 | `CSTacticsAppApp.swift` |
+| 根 | `AimNadeApp.swift` |
 | `Models/` | `LineupModels.swift`(140) / `FavoriteStore.swift`(68) / `DeveloperSettings.swift`(15) |
 | `Data/` | `LineupStore.swift`(29) / `lineups_mirage.json`(268) |
 | `Localization/` | `L10n.swift`(500) / `LanguageManager.swift`(39) / `LocalizedText.swift`(15) |
@@ -245,8 +253,7 @@
 ### 🔴 交付前置（P0，必须先做）
 
 1. **`AppIcon.appiconset/Contents.json` 无 `filename` 字段** → 没有实际 App 图标（只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`）。上架硬前置，**当前最高优先级**（`## Next` P0-1）。
-2. **`AccentColor.colorset/Contents.json` 无颜色值** → Accent Color 未生效（`colors` 数组只有 `{idiom: universal}`）。
-   - 连带效应：`AppTheme.accent = Color.accentColor`，被 `UtilityBadge.side` / `.category`、`FilterChip` 选中态、`ClusterPoint` 背景共用——**当前实际渲染为系统默认蓝**；配置颜色后这些位置会整体变色，需回归确认（尤其深色模式）。
+2. ~~Accent Color 未配置~~ ✅ **已完成**：`AccentColor.colorset` 为通用 sRGB `#3A7AFE`。
 
 ### 🟠 数据与内容
 
@@ -278,7 +285,7 @@
     - 定位不变：`README.md` **只用于面向开发者/用户描述项目，不作为 AI 进度日志**，详细进度只放在本文件（`PROJECT_STATUS.md`）。
 15. `AGENTS.md` 与 `PROJECT_STATUS.md` 在本轮之前**均未被 git 跟踪**，有丢失风险；本轮已提交纳入（见 `## Last Work`）。
     - `CODEX.md` **仍未被跟踪**：它属于既有的项目说明书，不属于本轮交接文档范围，本轮未提交、未修改。
-16. **Bundle Identifier 仍是模板默认值 `com.example.CSTacticsApp`**，未改成正式域名，**上架前必须修改**。
+16. **Bundle Identifier 仍是模板默认值 `com.example.AimNade`**，未改成正式域名，**上架前必须修改**。
 
 ### ❓ 待确认
 
@@ -289,13 +296,30 @@
 
 ## Last Work
 
-### 2026-09-19 — 刷新 `README.md`（在 PR 分支上，未进 `main`）
+### 2026-09-19 — 统一 AimNade 工程命名
+
+**任务**：将工程内的产品与技术命名统一为 `AimNade`。
+
+**做了**：
+
+- 工程、Target、Scheme、构建产物、源码目录、App 入口类型与文件统一为 `AimNade`。
+- Bundle Identifier 更新为 `com.example.AimNade`。
+- 更新 `AGENTS.md`、`README.md`、`PROJECT_STATUS.md`、`docs/LOCALIZATION.md` 和本地 `CODEX.md` 中的路径与构建命令。
+- 保留所有业务功能、JSON 数据、本地化内容和资源内容不变。
+
+**验证**：`xcodebuild -project AimNade.xcodeproj -scheme AimNade -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug build` → `** BUILD SUCCEEDED **`。构建产物为 `AimNade.app`，Bundle Identifier 为 `com.example.AimNade`。
+
+**影响**：Bundle Identifier 已变化，已有安装中的 `UserDefaults` 数据不会自动迁移到新的 App 标识。
+
+---
+
+### 2026-09-19 — 刷新 `README.md`（已合并至 `main`）
 
 **任务**：把已过期的 `README.md` 重写为与当前实现一致的简短项目描述，并按交接义务同步本文件。
 
 **做了**：
 
-- **重写 `README.md`**：产品名 `AimNade`（并说明 Xcode 工程名仍是历史名 `CSTacticsApp`）、功能清单（2D 地图与聚类缩放 / 道具列表 / 搜索 / 收藏 / 详情页 / 中英双语 / 开发者模式）、V1 范围（只做 Mirage）、运行与构建方式、以及 `AGENTS.md` / `PROJECT_STATUS.md` / `docs/LOCALIZATION.md` 的索引。
+- **重写 `README.md`**：产品名 `AimNade`、功能清单（2D 地图与聚类缩放 / 道具列表 / 搜索 / 收藏 / 详情页 / 中英双语 / 开发者模式）、V1 范围（只做 Mirage）、运行与构建方式、以及 `AGENTS.md` / `PROJECT_STATUS.md` / `docs/LOCALIZATION.md` 的索引。
 - 新增内容**逐条对照源码核实**，没有沿用旧描述：道具组 / 方案数量读自 `Data/lineups_mirage.json`（3 组 / 6 方案），聚类与双击缩放确认存在于 `Views/TacticalMapView.swift`，`Assets.xcassets` 下确认只有 `mirage_map` / `creator_avatar` 两个 imageset，文案措辞对照 `Localization/L10n.swift`（`appIntro` / `unofficialNoticeText`）。
 - 按 `AGENTS.md` 第 5 节要求，在 README 中**显式标注当前道具数据为占位内容**，并保留"非官方"表述。
 - 同步本文件四处：`## In Progress` 的工作区状态、`## Known Issues` 第 14 条、`## Next` 的 P1 第 7 项、`## Next Agent Handoff` 的当前基线。
@@ -305,7 +329,7 @@
 - ❌ 未修改任何 `.swift` / `.json` / `.pbxproj` / `.xcscheme` / `Assets` 内容。
 - ❌ 未改 `AGENTS.md`、`docs/LOCALIZATION.md`、`CODEX.md`。
 
-**提交**：分支 `docs/refresh-readme`，以 PR 形式提交，**未直接推送 `main`**；`main` 仍停在 `2209af3`。
+**提交**：分支 `docs/refresh-readme`，已通过 PR #37 合并至 `main`。
 
 **验证**：改动为纯文档。**本机为 Windows，没有 Xcode，未执行 `xcodebuild`**；App 代码零改动，`737fdaf` 的 `BUILD SUCCEEDED` 基线仍适用，但**尚未在 Mac 上重新确认**。
 
@@ -337,13 +361,13 @@
 
 **没有做**：
 
-- ❌ 未修改任何 `.swift` / `.json` / `.pbxproj` / `.xcscheme` / `Assets` 内容（`git diff --stat -- CSTacticsApp/` 为空可证；`CSTacticsApp/` 下 33 个被跟踪文件与 HEAD 逐字节一致）。
+- ❌ 未修改任何 `.swift` / `.json` / `.pbxproj` / `.xcscheme` / `Assets` 内容（`git diff --stat -- AimNade/` 为空可证；`AimNade/` 下 33 个被跟踪文件与 HEAD 逐字节一致）。
 - ❌ 未修改 `README.md`、`CODEX.md`、`docs/LOCALIZATION.md`。
 - ❌ 未 `git add` / 提交两个工程文件噪声，未还原任何现有改动。
 
 **提交**：本次以 `Add shared agent handoff documentation` 为信息，**仅提交** `AGENTS.md` 与 `PROJECT_STATUS.md` 两个新文件（父提交为 `737fdaf`）。该提交已 push 到 `origin/main`，本地 `main` 与远端同步。
 
-**验证**：`xcodebuild -project CSTacticsApp.xcodeproj -scheme CSTacticsApp -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug build` → `** BUILD SUCCEEDED **`。改动仅限两个 Markdown 交接文件，App 代码零改动。
+**验证**：`xcodebuild -project AimNade.xcodeproj -scheme AimNade -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug build` → `** BUILD SUCCEEDED **`。改动仅限两个 Markdown 交接文件，App 代码零改动。
 
 **后续修订（2026-09-16，仅文档）**：根据"真实教学截图允许继续使用占位图"的决定，**重新排定了 `## Next` 的优先级**：
 
@@ -357,21 +381,18 @@
 
 ### 当前基线
 
-- 分支 `main`：与 `origin/main` **完全同步**，停在 `2209af3`（`Update AimNade project priorities`）。
-- **有一个待审 PR**：分支 `docs/refresh-readme`，只改 `README.md` 与本文件（见 `## Last Work` 的 2026-09-19 条目）。合并前**不要**在该分支上继续叠加无关改动。
-- `main` 工作区干净，无未提交改动、无未跟踪文件；`project.pbxproj` 中 `LastUpgradeCheck = 1500`，基线不含 Xcode 27 升级噪声。`CODEX.md` 不在版本库中，重新克隆不会得到它。
-- 构建命令见 `AGENTS.md` 第 8 节；最近一次实测 `BUILD SUCCEEDED` 在 `737fdaf`（Xcode 27.0 / iPhone 17 + iOS 26.5 模拟器）。
+- 分支 `main`：本地包含 Accent Color 与工程命名统一两个提交，尚未 push，预计比 `origin/main` ahead 2。
+- 工作区保留 Xcode 27 升级元数据差异和未跟踪的 `CODEX.md`；没有半成品功能代码。
+- 新构建命令见 `AGENTS.md` 第 8 节；名称统一后已实测 `BUILD SUCCEEDED`（Xcode 27.0 / iPhone 17 + iOS 26.5 模拟器）。
 
-### 建议的下一个任务：配置正式 App Icon 与 Accent Color（P0-1）
+### 建议的下一个任务：配置正式 App Icon（P0-1）
 
-**为什么是它**：它是上架与观感的硬前置条件，成本极低，且**不需要改任何 Swift 代码**——目前"有 App 但没有图标"是交付上最说不通的一处缺口。
+**为什么是它**：Accent Color 已完成；App Icon 仍是上架与观感的硬前置条件，且**不需要改任何 Swift 代码**。
 
 **第一步的具体动作**：
 
-1. 放入一张 1024×1024 的 App Icon（`CSTacticsApp/Assets.xcassets/AppIcon.appiconset/`），并在该目录 `Contents.json` 的 images 条目里补上 `"filename"` 字段（当前只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`，无 `filename`）。
-2. 在 `AccentColor.colorset/Contents.json` 里填入实际颜色值（当前 `colors` 数组只有 `{idiom: universal}`，所以 Accent Color 未生效）。
-3. 注意副作用：`AppTheme.accent = Color.accentColor`，而 `UtilityBadge.side` / `.category` 与 `FilterChip` 的选中态、`ClusterPoint` 背景色都在用它。**当前实际渲染为系统默认蓝**，配置后会整体变色——请在模拟器里确认这些位置仍然可读（尤其深色模式）。
-4. 完成后跑一次构建、在模拟器里核对，并更新本文件。
+1. 放入一张 1024×1024 的 App Icon（`AimNade/Assets.xcassets/AppIcon.appiconset/`），并在该目录 `Contents.json` 的 images 条目里补上 `"filename"` 字段（当前只有一条 `{idiom: universal, platform: ios, size: 1024x1024}`，无 `filename`）。
+2. 完成后跑一次构建、在模拟器里核对，并更新本文件。
 
 ### 紧随其后：V1 完整产品流程检查（P0-2）
 
@@ -410,7 +431,7 @@ Mirage 首页 → 2D 地图 → 道具列表 → 搜索 → 收藏 → LineupGro
 
 **做图片时必须注意**：
 
-- 在 `CSTacticsApp/Assets.xcassets/` 下新增 imageset，**资源名必须与 JSON 中声明的名字逐字一致**（拼错不会报错，只会继续显示占位图）。
+- 在 `AimNade/Assets.xcassets/` 下新增 imageset，**资源名必须与 JSON 中声明的名字逐字一致**（拼错不会报错，只会继续显示占位图）。
 - 建议先做 3 张打通链路（`mirage_window_smoke_standard_t_spawn` 的站位 / 瞄点 / 结果），在模拟器里确认 `LineupDetailView` 的折叠区、全屏分页预览、图片缩放三处都换成真图，再批量推进剩余 5 个变体。
 - 新增完毕后确认 `.xcodeproj` 的 Resources 阶段仍正常（asset catalog 是整目录引用，通常无需改 pbxproj，但请验证构建）。
 - **图片的来源与授权必须先确认**（见 Known Issues 第 18 条）。转发他人游戏截图有版权风险；若是自截图，请在本文件记录来源与日期。**这是真正的前置条件，不是优先级问题。**
