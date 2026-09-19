@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-19
-> 任务前基线提交：`4e6e142`（`Configure AimNade app icon`，已推送至 `origin/main`）
-> 最近一次构建验证：中文 README 维护任务中复核 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 任务前基线提交：`638c5dc`（`Document AimNade in Chinese and require README sync`，已推送至 `origin/main`）
+> 最近一次构建验证：P0-2 产品流程检查修复后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -22,9 +22,9 @@
 
 把 Mirage 单地图 MVP 从"功能可用"推进到"可交付"，**优先级已在 2026-09-16 修订**（真实教学截图允许继续使用占位图）：
 
-1. **App Icon 与 Accent Color 已完成**（P0-1）；当前最高优先级为 P0-2 完整产品流程检查。
-2. **对当前 V1 做一次完整产品流程检查**（P0-2）：首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。只检查现有实现与明显问题，**不新增大功能**。
-3. **专项 localization audit**（P0-3）：修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
+1. **App Icon 与 Accent Color 已完成**（P0-1）。
+2. **V1 完整产品流程检查已完成**（P0-2）：中英文、浅色/深色、空状态/有数据状态及收藏持久化已走查；修复了教学图片全屏占位页在黑色背景上对比度不足的问题。
+3. **当前最高优先级：专项 localization audit**（P0-3），修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
 4. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
 5. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
 
@@ -95,9 +95,17 @@
 
 - 中文 README 已按当前源码、数据及资源核对；`AGENTS.md` 第 10 节已规定每次开发任务结束检查 README，相关变化随任务同步。
 
+### P0-2 产品流程检查
+
+- 已在 iPhone 17 / iOS 26.5 模拟器走查 Mirage 首页、2D 地图、道具列表、搜索、收藏、道具组详情、投掷方案详情、教学图片占位与全屏预览、设置和关于页。
+- 已覆盖简体中文/英文、浅色/深色、搜索有结果/无结果、收藏空状态/有数据状态，并验证道具组与方案收藏在 App 重启后保留。
+- 首屏图标在模拟器 SpringBoard 显示正常；开发者地图控件可正常打开。
+- 修复 `LineupDetailView` 全屏教学图片占位内容对比度过低：在黑色背景上统一使用半透明白色前景，浅色和深色环境均可读。
+- 运行期未发现 App 崩溃。由于当前没有 UI 测试 target，导航定义通过源码检查、各目标页通过临时仓库外测试入口独立启动；上架前仍建议在真机补一次点击/返回/缩放手势烟雾测试。
+
 ## In Progress
 
-- 本轮仅修改 `README.md`、`AGENTS.md`、`PROJECT_STATUS.md`；文档独立本地提交，尚未推送。
+- P0-2 检查与对比度修复已完成；本轮改动将作为独立提交直接推送到 `origin/main`。
 
 ### 工作区状态
 
@@ -107,10 +115,12 @@
  M AimNade.xcodeproj/project.pbxproj
  M AimNade.xcodeproj/xcshareddata/xcschemes/AimNade.xcscheme
 ?? CODEX.md
+?? 图库/
 ```
 
 - 两个工程文件的未提交差异仅为 Xcode 27 升级元数据；名称统一所需内容已纳入本次提交。
 - `CODEX.md` 仍未被 git 跟踪。
+- `图库/` 是用户本地素材目录，未跟踪，本轮不纳入提交。
 - 没有改到一半的功能代码。
 
 ### 尚未收敛的能力缺口
@@ -124,13 +134,13 @@
 ## Next
 
 > 范围纪律：**V1 只做 Mirage**。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
-> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1 已完成，当前最高优先级是 P0-2。
+> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1 与 P0-2 已完成，当前最高优先级是 P0-3。
 > P0 的三项都属于"在当前实现上做检查或配置"，**不要因此新增大功能**。
 
 ### P0 — 交付前置与完整性确认
 
 1. ✅ **App Icon 与 Accent Color 已配置**：用户提供的第一版图标已接入 `AppIcon.appiconset`；Accent Color 为 `#3A7AFE`，构建通过。
-2. **对当前 V1 做一次完整产品流程检查**：只检查现有实现与明显问题，**不新增大功能**。
+2. ✅ **当前 V1 完整产品流程检查已完成**：现有主流程、中英文、深浅色、空状态与收藏持久化已走查；修复了全屏教学图占位页对比度问题。
    - 逐项走查：Mirage 首页 / 2D 地图 / 道具列表 / 搜索 / 收藏 / LineupGroup / LineupVariant / 教学图片占位 / About / 中英切换。
    - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
    - **已知可接受项**：教学图片显示占位图属预期行为，**不要把它记为新缺陷**（见第 10 项）。
@@ -224,7 +234,7 @@
 
 `lineups_mirage.json`（Bundle 资源）→ `LineupStore.mirageMap`（`static let`，进程内只读一次）→ 各页面通过参数接收 `Map` → 搜索/过滤/聚类都在内存中对 `map.lineupGroups` 做计算。
 
-### 文件清单（23 个 Swift 文件，3578 行）
+### 文件清单（23 个 Swift 文件，3577 行）
 
 | 目录 | 文件 |
 |---|---|
@@ -233,7 +243,7 @@
 | `Data/` | `LineupStore.swift`(29) / `lineups_mirage.json`(268) |
 | `Localization/` | `L10n.swift`(500) / `LanguageManager.swift`(39) / `LocalizedText.swift`(15) |
 | `Theme/` | `AppTheme.swift`(19) |
-| `Views/` | `TacticalMapView.swift`(1114) / `LineupDetailView.swift`(437) / `LineupSearchView.swift`(274) / `LineupGroupDetailView.swift`(159) / `FavoritesView.swift`(142) / `AboutView.swift`(138) / `UtilityListView.swift`(79) / `MirageDetailView.swift`(80) / `SettingsView.swift`(49) / `MapListView.swift`(45) / `EmptyStateView.swift`(44) |
+| `Views/` | `TacticalMapView.swift`(1114) / `LineupDetailView.swift`(436) / `LineupSearchView.swift`(274) / `LineupGroupDetailView.swift`(159) / `FavoritesView.swift`(142) / `AboutView.swift`(138) / `UtilityListView.swift`(79) / `MirageDetailView.swift`(80) / `SettingsView.swift`(49) / `MapListView.swift`(45) / `EmptyStateView.swift`(44) |
 | `Views/Components/` | `MapMarkerView.swift`(68) / `UtilityBadge.swift`(56) / `FeatureCard.swift`(39) |
 | 本地化资源 | `en.lproj/InfoPlist.strings` / `zh-Hans.lproj/InfoPlist.strings`（均只含 `CFBundleDisplayName`） |
 
@@ -256,7 +266,7 @@
 
 ### 🔴 交付前置（P0，必须先做）
 
-1. ✅ **App Icon 已配置**：`Contents.json` 引用 `AppIcon.png`（1024×1024，不含透明通道）；真机主屏幕观感随 P0-2 检查。
+1. ✅ **App Icon 已配置**：`Contents.json` 引用 `AppIcon.png`（1024×1024，不含透明通道）；模拟器 SpringBoard 已确认显示正常，真机观感仍待上架前检查。
 2. ~~Accent Color 未配置~~ ✅ **已完成**：`AccentColor.colorset` 为通用 sRGB `#3A7AFE`。
 
 ### 🟠 数据与内容
@@ -298,6 +308,18 @@
 20. `AboutView` 显示的版本号来自 `Bundle.main` 的 `CFBundleShortVersionString`（缺失时回退 `"1.0"`）；而 App 名称走的是 `L10n` 常量而非 Bundle。是否统一为只读 Bundle 元数据，待确认。
 
 ## Last Work
+
+### 2026-09-19 — P0-2 完整产品流程检查
+
+- 在 iPhone 17 / iOS 26.5 模拟器覆盖首页、2D 地图、道具列表、搜索、收藏、道具组/投掷方案详情、教学图片占位与全屏预览、设置、关于页；检查中英文、浅色/深色、搜索有结果/无结果、收藏空状态/有数据状态及重启持久化。
+- 修复 `AimNade/Views/LineupDetailView.swift` 中全屏教学图占位内容在黑色背景上对比度不足的问题；只调整现有共享占位组件的前景色，未引入新依赖或新抽象。
+- 验证：Xcode 27.0（27A266a），iPhone 17 / iOS 26.5 模拟器 Debug 构建通过（exit 0）；修复后中文浅色全屏占位页复验通过，未发现 App 崩溃。
+- 当前无 UI 测试 target，测试页面由仓库外临时入口启动，导航定义配合源码检查；上架前仍建议真机补做点击/返回/缩放手势烟雾测试。临时测试入口位于 `/tmp`，未写入或提交到仓库。
+- README 已检查，无需更新：本轮未改变用户可见功能、V1 范围、技术栈、目录/数据结构或资源状态。
+- `AGENTS.md` 已按用户最新要求增加交付规则：开发任务验证并提交后默认直接推送，除非用户另有明确要求。
+- 提交范围仅包含 `LineupDetailView.swift`、`AGENTS.md` 和本状态文件；原有 Xcode 工程噪声、`CODEX.md` 与用户本地 `图库/` 继续保留。
+
+---
 
 ### 2026-09-19 — 中文 README 与持续维护规则
 
@@ -404,31 +426,21 @@
 
 ### 当前基线
 
-- 分支 `main`：App Icon 提交 `4e6e142` 已推送并核对远端；本轮中文 README 与维护规则作为独立本地提交，尚未 push。
-- 工作区保留 Xcode 27 升级元数据差异和未跟踪的 `CODEX.md`；没有半成品功能代码。
-- 构建命令见 `AGENTS.md` 第 8 节；本轮已重新执行 Debug 构建并通过（iPhone 17 + iOS 26.5 模拟器）。
-- 后续任务提交前检查 README，并在本文件 `Last Work` 记录同步章节或无需更新的原因；功能优先级仍为 P0-2、P0-3。
+- 分支 `main`：任务前基线 `638c5dc` 已推送到 `origin/main`；P0-2 改动将按新交付规则作为独立提交直接推送。
+- 工作区保留 Xcode 27 升级元数据差异、未跟踪的 `CODEX.md` 和用户本地 `图库/`；没有半成品功能代码。
+- 构建命令见 `AGENTS.md` 第 8 节；P0-2 修复后 Debug 构建通过（iPhone 17 + iOS 26.5 模拟器）。
+- 后续任务提交前检查 README，并在本文件 `Last Work` 记录同步章节或无需更新的原因；当前最高优先级为 P0-3。
 
-### 建议的下一个任务：V1 完整产品流程检查（P0-2）
+### 建议的下一个任务：专项 localization audit（P0-3）
 
-**为什么是它**：资源和文档的问题已经梳理清楚，接下来应该确认"现有实现到底能不能走通"，而不是继续加功能。
+**为什么是它**：P0-2 已确认现有主流程可用，当前剩余的交付前文档缺口是 `docs/LOCALIZATION.md` 登记的 key 比实际 `L10n.Key` 少 34 个。
 
-**逐项走查清单**（10 个面，只检查现有实现与明显问题，**不新增大功能**）：
+**执行边界**：
 
-Mirage 首页 → 2D 地图 → 道具列表 → 搜索 → 收藏 → LineupGroup → LineupVariant → 教学图片占位 → About → 中英切换
-
-**检查要点**：
-
-- 每个入口都能正常进入并返回，导航栈不重复、不卡死。
-- 空状态正确：搜索无结果、无收藏、过滤后无点位（地图上会叠 `EmptyStateView`）都要显示合理提示，而不是空白。
-- **中英两档都过一遍**（设置里切换），确认没有硬编码文案漏出、没有中英串台。
-- 深色模式下文本与徽章可读。
-- **已知可接受项**：教学图片显示占位图属预期行为（真实截图尚未就绪），**不要记为新缺陷**。
-- 发现的问题分两类处理：**明显问题可当场修**；**属于新功能的只登记进本文件的 `## Next`**，不在本轮实现。
-
-### 再之后：专项 localization audit（P0-3）
-
-对齐 `docs/LOCALIZATION.md` 与实际 `L10n.Key`（登记 61 / 实际 95，差 34 个）。**只改文档，不要为了补 key 重构 App。**
+- 对齐 `docs/LOCALIZATION.md` 与实际 `L10n.Key`（登记 61 / 实际 95，差 34 个）。
+- 确认中英文分支没有真正缺失，检查 `Views/` 下固定 UI 文案未被硬编码。
+- 把 V1 只做 Mirage 的范围约束补进本地化规范。
+- **以文档修正为主，不要为了补 key 重构 App。**若发现代码侧真正不一致，单独记录并做最小修复。
 
 ### 内容填充任务（P1，不阻塞交付）
 

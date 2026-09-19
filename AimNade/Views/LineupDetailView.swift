@@ -317,12 +317,11 @@ private struct PreviewPlaceholderView: View {
         VStack(spacing: 12) {
             Image(systemName: "photo")
                 .font(.system(size: 52))
-                .foregroundStyle(.secondary)
 
             Text(placeholderText)
                 .font(.headline)
-                .foregroundStyle(.secondary)
         }
+        .foregroundStyle(.white.opacity(0.65))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
     }

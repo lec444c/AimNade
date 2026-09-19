@@ -136,6 +136,7 @@ xcodebuild -project AimNade.xcodeproj -scheme AimNade -showdestinations
 3. **不要提交**：`xcuserdata`、DerivedData、编辑器临时文件、只由 Xcode 版本升级产生的工程文件噪声。`.gitignore` 已忽略 `.DS_Store` / `xcuserdata/` / `*.xcuserstate`。
 4. **只提交本任务明确涉及的文件**。提交前先 `git status` 检查，不要顺手带上其他未跟踪文件或本地修改（例如 `project.pbxproj` / `.xcscheme` 的升级噪声）。
 5. 报告改动时说明改了哪些文件以及各文件的主要变化；不确定的地方明确标注"待确认"，**不要把计划中的功能写成已完成**。
+6. 开发任务完成、验证通过并形成清晰提交后，**默认直接推送到当前远程分支**；只有用户明确要求不推送、只做本地提交或需要 PR 审核时才停在本地。
 
 ### README 同步维护（Codex / DSH 共用）
 
