@@ -18,13 +18,13 @@
 		A10000000000000000000018 /* LocalizedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000028 /* LocalizedText.swift */; };
 		A10000000000000000000019 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000029 /* L10n.swift */; };
 		A1000000000000000000001A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002A /* SettingsView.swift */; };
-		A1000000000000000000001B /* MirageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002B /* MirageDetailView.swift */; };
-		A1000000000000000000001C /* UtilityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002C /* UtilityListView.swift */; };
+		A1000000000000000000001B /* TacticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002B /* TacticsView.swift */; };
+		A1000000000000000000001C /* TacticsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002C /* TacticsListView.swift */; };
 		A1000000000000000000001D /* DeveloperSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002D /* DeveloperSettings.swift */; };
 		A20000000000000000000010 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000030 /* InfoPlist.strings */; };
 		A30000000000000000000010 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000020 /* AboutView.swift */; };
 		A40000000000000000000010 /* LineupGroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000020 /* LineupGroupDetailView.swift */; };
-		A50000000000000000000010 /* LineupSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000020 /* LineupSearchView.swift */; };
+		A50000000000000000000010 /* LineupSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000020 /* LineupSearch.swift */; };
 		A60000000000000000000010 /* FavoriteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60000000000000000000020 /* FavoriteStore.swift */; };
 		A70000000000000000000010 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70000000000000000000020 /* EmptyStateView.swift */; };
 		A80000000000000000000010 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80000000000000000000020 /* FavoritesView.swift */; };
@@ -48,14 +48,14 @@
 		A10000000000000000000028 /* LocalizedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedText.swift; sourceTree = "<group>"; };
 		A10000000000000000000029 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		A1000000000000000000002A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		A1000000000000000000002B /* MirageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirageDetailView.swift; sourceTree = "<group>"; };
-		A1000000000000000000002C /* UtilityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilityListView.swift; sourceTree = "<group>"; };
+		A1000000000000000000002B /* TacticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TacticsView.swift; sourceTree = "<group>"; };
+		A1000000000000000000002C /* TacticsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TacticsListView.swift; sourceTree = "<group>"; };
 		A1000000000000000000002D /* DeveloperSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSettings.swift; sourceTree = "<group>"; };
 		A20000000000000000000020 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A20000000000000000000021 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		A30000000000000000000020 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		A40000000000000000000020 /* LineupGroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineupGroupDetailView.swift; sourceTree = "<group>"; };
-		A50000000000000000000020 /* LineupSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineupSearchView.swift; sourceTree = "<group>"; };
+		A50000000000000000000020 /* LineupSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineupSearch.swift; sourceTree = "<group>"; };
 		A60000000000000000000020 /* FavoriteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteStore.swift; sourceTree = "<group>"; };
 		A70000000000000000000020 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		A80000000000000000000020 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
@@ -132,10 +132,10 @@
 			children = (
 				B10000000000000000000031 /* Components */,
 				A10000000000000000000023 /* MapListView.swift */,
-				A1000000000000000000002B /* MirageDetailView.swift */,
+				A1000000000000000000002B /* TacticsView.swift */,
 				A10000000000000000000024 /* TacticalMapView.swift */,
-				A1000000000000000000002C /* UtilityListView.swift */,
-				A50000000000000000000020 /* LineupSearchView.swift */,
+				A1000000000000000000002C /* TacticsListView.swift */,
+				A50000000000000000000020 /* LineupSearch.swift */,
 				A80000000000000000000020 /* FavoritesView.swift */,
 				A70000000000000000000020 /* EmptyStateView.swift */,
 				A40000000000000000000020 /* LineupGroupDetailView.swift */,
@@ -268,12 +268,12 @@
 				A10000000000000000000018 /* LocalizedText.swift in Sources */,
 				A10000000000000000000019 /* L10n.swift in Sources */,
 				A1000000000000000000001A /* SettingsView.swift in Sources */,
-				A1000000000000000000001B /* MirageDetailView.swift in Sources */,
-				A1000000000000000000001C /* UtilityListView.swift in Sources */,
+				A1000000000000000000001B /* TacticsView.swift in Sources */,
+				A1000000000000000000001C /* TacticsListView.swift in Sources */,
 				A1000000000000000000001D /* DeveloperSettings.swift in Sources */,
 				A30000000000000000000010 /* AboutView.swift in Sources */,
 				A40000000000000000000010 /* LineupGroupDetailView.swift in Sources */,
-				A50000000000000000000010 /* LineupSearchView.swift in Sources */,
+				A50000000000000000000010 /* LineupSearch.swift in Sources */,
 				A60000000000000000000010 /* FavoriteStore.swift in Sources */,
 				A70000000000000000000010 /* EmptyStateView.swift in Sources */,
 				A80000000000000000000010 /* FavoritesView.swift in Sources */,

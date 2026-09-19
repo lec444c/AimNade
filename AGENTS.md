@@ -53,9 +53,9 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 
 | 现状 | 决定 | 触发重新评估的条件 |
 |---|---|---|
-| `LineupStore.maps` 只含 Mirage；`MapListView` 未接入根导航 | **刻意设计**。V1 只做 Mirage，用户不需要地图列表前置 | **开始增加第二张地图时**才提升优先级，届时应把 `MirageDetailView` 等命名泛化为 `MapDetailView` |
+| `LineupStore.maps` 只含 Mirage；`MapListView` 未接入根导航 | **刻意设计**。V1 只做 Mirage，战术页顶部地图选择器已作为全页 Context，不需要地图列表前置 | **开始增加第二张地图时**再向 `LineupStore.maps` 接入真实数据并验证战术页切换 |
 | `LineupStore` 在 JSON 失败时回退空 `Map` | 保留 fallback（防 crash）**没有问题**；但"静默"需要改 | 后续任务：Debug 输出明确错误 + Release 显示 empty state |
-| `docs/LOCALIZATION.md` key 清单滞后 34 个 | **本轮不补**，不做零散修补 | 一次专项 localization audit 统一对齐 |
+| `docs/LOCALIZATION.md` key 清单滞后 37 个 | **本轮不补**，不做零散修补 | 一次专项 localization audit 统一对齐 |
 
 ## 4. 命名与本地化规则
 
@@ -63,7 +63,7 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 - 固定 UI 文案**必须**接入现有本地化系统：`L10n.Key` → 英文分支 → 简体中文分支，三处同步。**禁止**在 View 中硬写用户可见文本。
 - JSON 中的业务内容使用 `LocalizedText`（`en` / `zhHans`），**不**放进 `L10n`。
 - **图片资源名、代码变量名、数据 ID 一律使用英文**，不汉化。
-- `L10n.Key` 当前有 95 个 case。`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记了 61 个，**新增文案时以 `L10n.swift` 为准**，不要照抄清单。
+- `L10n.Key` 当前有 98 个 case。`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记了 61 个，**新增文案时以 `L10n.swift` 为准**，不要照抄清单。
 - 提交前自检：在 `Views/` 下搜索 `Text("`、`Label("`、`Section("`、`navigationTitle("`，确认没有硬编码的固定文案（纯数字插值、已本地化的插值属合规）。
 
 ## 5. 数据规则
@@ -93,7 +93,7 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 | 资产 | 位置 | 说明 |
 |---|---|---|
 | `AppTheme` | `Theme/AppTheme.swift` | 颜色、圆角、间距的唯一来源 |
-| `FeatureCard` | `Views/Components/FeatureCard.swift` | 首页功能卡片 |
+| `FeatureCard` | `Views/Components/FeatureCard.swift` | 历史功能卡组件；当前三 Tab 主导航不再使用 |
 | `MapMarkerView` | `Views/Components/MapMarkerView.swift` | 道具圆点标记（含开发者坐标浮层） |
 | `UtilityBadge` | `Views/Components/UtilityBadge.swift` | 类型 / 阵营 / 分类 / 难度徽章 |
 | `EmptyStateView` | `Views/EmptyStateView.swift` | 统一空状态 |
@@ -107,8 +107,8 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 
 - 开发者模式中的坐标拖动**只存在于页面 `@State` 中**，不会写回 JSON。不要把它当作已持久化数据，**也不要擅自为它添加写回逻辑**。
 - 保持本地优先设计：不引入网络、账号、数据库或第三方依赖。
-- 不要继续把不相关职责堆进单个巨型 View。`Views/TacticalMapView.swift`（1114 行，内含 17 个内部类型）已知需要拆分，**新增逻辑优先考虑独立组件**。
-- `Views/MapListView.swift` 已实现但**未接入根导航**；`AimNadeApp.swift` 的 `NavigationStack` 直接进入 `MirageDetailView`。**这是已确认的刻意设计**（V1 只做 Mirage，用户不需要地图列表前置）。**不要顺手"修好"它**；只有任务明确要求"开始增加第二张地图"时才提升优先级。
+- 不要继续把不相关职责堆进单个巨型 View。`Views/TacticalMapView.swift`（944 行，内含 13 个内部类型）仍较大，**新增顶层筛选与导航逻辑应留在 `TacticsView`，不再塞回地图引擎**。
+- `Views/MapListView.swift` 已实现但**未接入根导航**；`AimNadeApp.swift` 的根视图为战术 / 收藏 / 设置三 Tab，战术 Tab 直接进入 `TacticsView`。V1 只有 Mirage，因此不另行前置地图列表；第二张地图就绪时直接扩展现有顶部地图选择器。
 
 ## 8. 常用命令
 
@@ -153,8 +153,8 @@ xcodebuild -project AimNade.xcodeproj -scheme AimNade -showdestinations
 |---|---|---|---|
 | `AGENTS.md` | 本文件：长期约束与交接机制 | ✅ 已提交 | 维护中 |
 | `PROJECT_STATUS.md` | 当前进度快照（**每次任务后更新**） | ✅ 已提交 | 维护中 |
-| `CODEX.md` | 完整架构、功能清单、路线图 | ❌ **未跟踪** | 已核对，与源码一致；纳管与否待定 |
-| `docs/LOCALIZATION.md` | 本地化规范 + 核心 key 清单 | ✅ 已跟踪 | 规范有效；key 清单滞后 34 个，待专项 audit |
+| `CODEX.md` | 完整架构、功能清单、路线图 | ❌ **未跟踪** | 仍描述旧 Launcher 导航；本轮遵守既有工作边界未修改，纳管前需同步 |
+| `docs/LOCALIZATION.md` | 本地化规范 + 核心 key 清单 | ✅ 已跟踪 | 规范有效；key 清单滞后 37 个，待专项 audit |
 | `README.md` | 中文项目介绍、功能、结构与运行指南（**不作为 AI 进度日志**） | ✅ 已跟踪 | 按第 10 节随相关变更同步维护 |
 
 > 进度记录的**唯一**去处是 `PROJECT_STATUS.md`。不要把进度写进 `README.md`，也不要在 `CODEX.md` 里维护状态。

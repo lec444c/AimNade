@@ -8,7 +8,7 @@ struct MapListView: View {
             List {
                 ForEach(LineupStore.maps) { map in
                     NavigationLink {
-                        MirageDetailView(map: map)
+                        TacticsView(maps: [map])
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(map.name.value(for: languageManager))

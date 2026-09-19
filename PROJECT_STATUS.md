@@ -1,9 +1,9 @@
 # AimNade Project Status
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
-> 最后更新：2026-09-19
-> 任务前基线提交：`638c5dc`（`Document AimNade in Chinese and require README sync`，已推送至 `origin/main`）
-> 最近一次构建验证：P0-2 产品流程检查修复后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 最后更新：2026-09-20
+> 任务前基线提交：`6d56c1e`（`Finalize P0-2 handoff`，已推送至 `origin/main`）
+> 最近一次构建验证：主界面与导航 UI/UX 重构后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -24,9 +24,10 @@
 
 1. **App Icon 与 Accent Color 已完成**（P0-1）。
 2. **V1 完整产品流程检查已完成**（P0-2）：中英文、浅色/深色、空状态/有数据状态及收藏持久化已走查；修复了教学图片全屏占位页在黑色背景上对比度不足的问题。
-3. **当前最高优先级：专项 localization audit**（P0-3），修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
-4. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
-5. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
+3. **主界面/导航 UI/UX 重构已完成并通过用户审阅**：代码、文档、构建与代表性模拟器验证均已完成，已获准提交并推送。
+4. **当前最高优先级：专项 localization audit**（P0-3），修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
+5. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
+6. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
 
 完整的优先级拆分见 `## Next`。
 
@@ -71,19 +72,20 @@
 
 ### 列表、详情、搜索、收藏、设置、关于
 
-- 首页：`MirageDetailView` 4 张功能卡片（2D 战术地图 / 道具列表 / 搜索 / 收藏），进入后所有入口可用。
-- 道具列表：`UtilityListView` 按 `LineupCategory` 分组浏览道具组，带类型/分类徽章与方案数。
+- 根导航：`TabView` 只保留战术 / 收藏 / 设置三个用户目标，每个 Tab 有独立 `NavigationStack`；启动默认直接进入战术页。
+- 战术页：`TacticsView` 统一管理当前地图、地图/列表模式、T/CT 阵营、道具类型和搜索词；顶部地图选择器当前只列出已有真实数据源的 Mirage。
+- 道具列表：`TacticsListView` 和地图共享同一筛选状态，按 `LineupCategory` 分组，每行直接显示“起点 → 目标点”、方案名、类型、阵营和单方案收藏按钮。
 - 道具组详情：`LineupGroupDetailView` 概览信息 + 方案卡片列表 + 整组收藏。
 - 投掷方案详情：`LineupDetailView` 概览 / 位置 / 投掷步骤 / 教学图片折叠区 / 备注 + 单方案收藏。
 - 教学图片：折叠区 + 全屏分页预览（`TabView.page`）+ 图片缩放（`ZoomableImageView`）。**结构完整，但资源缺失 → 实际显示占位图。**
-- 搜索：`LineupSearchView` 中英文全文检索。道具组的检索字段为 ID / mapId / 名称 / 类型 / 阵营 / 分类；方案的检索字段为 ID / 名称 / 出生点·身位要求 / 起止区域 / 投掷方式 / 说明 / 难度。查询与字段都做大小写与变音符折叠、并支持去空格匹配（`"asite"` 能命中 `"A Site"`）——相关中英检索词表目前硬编码在 `LineupSearchView.swift` 文件的私有扩展里。结果可跳转到道具组或方案详情。
+- 搜索：不再是独立页面，改为战术顶部的原生 `.searchable`，实时同步过滤地图和列表。道具组匹配 ID / mapId / 目标名 / 类型 / 阵营 / 分类；方案匹配 ID / 名称 / 出生点·身位要求 / 起止区域 / 投掷方式 / 说明 / 难度，并保留大小写、变音符与去空格匹配。
 - 收藏：`FavoriteStore` 同时维护道具组与方案两组 ID 集合，`UserDefaults` 持久化；两个详情页都有星标按钮，`FavoritesView` 分区展示并复用详情页作为目标页。
 - 设置：`SettingsView` 语言选择（跟随系统 / 简体中文 / 英文）+ 开发者模式开关 + 关于页入口。
 - 关于：`AboutView` 作者头像（`creator_avatar`）、作者名、版本号、非官方声明、鸣谢。
 
 ### 本地化与 UI Design System
 
-- `LanguageManager` 三档语言（跟随系统 / 简体中文 / 英文），`UserDefaults` 持久化；`L10n`（`L10n.Key` 95 个 case，中英双语分支齐全）+ `LocalizedText`（JSON 业务内容双语）。
+- `LanguageManager` 三档语言（跟随系统 / 简体中文 / 英文），`UserDefaults` 持久化；`L10n`（`L10n.Key` 98 个 case，中英双语分支齐全）+ `LocalizedText`（JSON 业务内容双语）。
 - `Theme/AppTheme.swift`：颜色、圆角、间距的唯一来源。
 - `AccentColor.colorset` 已配置通用 sRGB 品牌色 `#3A7AFE`；`AppTheme.accent` 继续使用 `Color.accentColor`。
 - `AppIcon.appiconset/AppIcon.png` 已接入用户提供的第一版图标：1024×1024、不含透明通道，保持原画面完整；使用通用外观，iPhone / iPad 图标资源已编译打包。
@@ -105,11 +107,11 @@
 
 ## In Progress
 
-- P0-2 检查与对比度修复已完成并推送到 `origin/main`；当前没有进行中的功能改动。
+- P0-3 localization audit 尚未开始；下一步只对齐 `docs/LOCALIZATION.md` 与实际 98 个 `L10n.Key`，不重构 App。
 
 ### 工作区状态
 
-本次提交完成后，工作区仍保留以下既有非功能改动：
+本轮 UI/UX 重构提交后，工作区应只保留以下任务前既有改动：
 
 ```text
  M AimNade.xcodeproj/project.pbxproj
@@ -118,23 +120,23 @@
 ?? 图库/
 ```
 
-- 两个工程文件的未提交差异仅为 Xcode 27 升级元数据；名称统一所需内容已纳入本次提交。
+- `project.pbxproj` 的 3 个 Swift 文件重命名引用属于本轮提交；提交后保留的差异仅为任务前已有的 Xcode 27 升级元数据。Scheme 也只包含任务前已有的升级元数据差异。
 - `CODEX.md` 仍未被 git 跟踪。
 - `图库/` 是用户本地素材目录，未跟踪，本轮不纳入提交。
-- 没有改到一半的功能代码。
+- 本轮重构代码已构建、完成代表性模拟器验证并获用户批准收口。
 
 ### 尚未收敛的能力缺口
 
 - **18 张教学图片全部缺失**（详见 Known Issues）。**已确认不阻塞交付**：真实截图就绪前占位图可继续使用，已降级为 P1 内容填充任务。
 - **内容体量小且为占位数据**：3 个道具组 / 6 个投掷方案，全部 T 方 Smoke。
 - **JSON 加载失败路径不可见**：当前静默回退空 `Map`。已确认不是最终设计，优化方向见 `## Next` P1 第 4 项与 Known Issues 第 6 条。
-- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 95，差 34 个）。已排为 P0-3，做一次专项 localization audit **修正文档**（不重构 App），见 `## Next` P0 第 3 项。
+- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 98，差 37 个）。已排为 P0-3，做一次专项 localization audit **修正文档**（不重构 App），见 `## Next` P0 第 3 项。
 - 无测试覆盖。
 
 ## Next
 
 > 范围纪律：**V1 只做 Mirage**。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
-> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1 与 P0-2 已完成，当前最高优先级是 P0-3。
+> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1、P0-2 与主界面 UI/UX 重构已完成。当前继续 P0-3。
 > P0 的三项都属于"在当前实现上做检查或配置"，**不要因此新增大功能**。
 
 ### P0 — 交付前置与完整性确认
@@ -145,7 +147,7 @@
    - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
    - **已知可接受项**：教学图片显示占位图属预期行为，**不要把它记为新缺陷**（见第 10 项）。
    - 发现的问题按"明显问题"与"新功能需求"分类记录：明显问题可修，新功能需求只登记进本文件，不在本轮实现。
-3. **专项 localization audit**：`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记 61 个 key，实际 `L10n.Key` 有 95 个，**存在 34 个差异**。
+3. **专项 localization audit**：`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记 61 个 key，实际 `L10n.Key` 有 98 个，**存在 37 个差异**。
    - 目标：**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
    - audit 范围：比对 `L10n.Key` 与实际清单、确认中英文双语分支无遗漏、确认 `Views/` 下无硬编码文案、把 V1 范围约束补进规范文档。
    - **约束：不要为了补 key 而重构 App。** 只改文档；若发现代码侧真正不一致（例如某 key 只有英文没有中文），单独记录并按需最小修复，不做结构性改动。
@@ -181,10 +183,9 @@
 
 ### 条件性任务（等触发条件出现再做）
 
-15. **把 `MapListView` 接入根导航**：**已确认是刻意设计**（V1 只做 Mirage，用户不需要先看地图列表）。
-    - 触发条件：**开始增加第二张地图时**，才把它提升为正式任务。
-    - 届时应一并把 `MirageDetailView` 等 Mirage 专用命名泛化为 `MapDetailView`。
-    - **在此之前维持低优先级，不要顺手"修好"它。**
+15. **向战术页接入第二张真实地图数据**：顶部地图选择器和共享状态已就绪，但 V1 仍只做 Mirage。
+    - 触发条件：第二张地图的 JSON、2D 地图资源和已核验道具数据全部就绪。
+    - 届时把新 `Map` 加入 `LineupStore.maps`，验证地图/列表/搜索/筛选随地图切换；不需要把 `MapListView` 改成启动前置页。
 
 ## V1 Scope
 
@@ -219,8 +220,9 @@
 
 - `AimNade/AimNadeApp.swift` 是 `@main` 入口。
 - 注入三个全局 `ObservableObject`：`LanguageManager`、`DeveloperSettings`、`FavoriteStore`。
-- 根导航：`NavigationStack` **直接进入 `MirageDetailView(map: LineupStore.mirageMap)`**，右上角齿轮进设置。
-- `Views/MapListView.swift` 已实现地图列表页（含自己的 `NavigationStack`），但**未接入启动流程**。全仓除 pbxproj 与文档外无任何引用。
+- 根导航：`TabView` 包含战术 / 收藏 / 设置，每个 Tab 内是独立 `NavigationStack`；战术为默认 Tab。
+- `TacticsView` 是主界面，顶部 `Menu` 选择当前地图，`.searchable` 实时过滤，`Picker(.segmented)` 在地图/列表与 T/CT 之间切换，道具类型使用横向 compact chips。
+- `Views/MapListView.swift` 仍未接入启动流程。V1 只有 Mirage，多地图扩展应继续使用战术页的顶部选择器，不需要恢复启动前置列表。
 
 ### 数据模型
 
@@ -234,7 +236,7 @@
 
 `lineups_mirage.json`（Bundle 资源）→ `LineupStore.mirageMap`（`static let`，进程内只读一次）→ 各页面通过参数接收 `Map` → 搜索/过滤/聚类都在内存中对 `map.lineupGroups` 做计算。
 
-### 文件清单（23 个 Swift 文件，3577 行）
+### 文件清单（23 个 Swift 文件，3455 行）
 
 | 目录 | 文件 |
 |---|---|
@@ -243,7 +245,7 @@
 | `Data/` | `LineupStore.swift`(29) / `lineups_mirage.json`(268) |
 | `Localization/` | `L10n.swift`(500) / `LanguageManager.swift`(39) / `LocalizedText.swift`(15) |
 | `Theme/` | `AppTheme.swift`(19) |
-| `Views/` | `TacticalMapView.swift`(1114) / `LineupDetailView.swift`(436) / `LineupSearchView.swift`(274) / `LineupGroupDetailView.swift`(159) / `FavoritesView.swift`(142) / `AboutView.swift`(138) / `UtilityListView.swift`(79) / `MirageDetailView.swift`(80) / `SettingsView.swift`(49) / `MapListView.swift`(45) / `EmptyStateView.swift`(44) |
+| `Views/` | `TacticalMapView.swift`(944) / `LineupDetailView.swift`(436) / `TacticsView.swift`(230) / `LineupGroupDetailView.swift`(159) / `FavoritesView.swift`(142) / `AboutView.swift`(138) / `TacticsListView.swift`(115) / `LineupSearch.swift`(103，搜索匹配器) / `SettingsView.swift`(49) / `MapListView.swift`(45) / `EmptyStateView.swift`(44) |
 | `Views/Components/` | `MapMarkerView.swift`(68) / `UtilityBadge.swift`(56) / `FeatureCard.swift`(39) |
 | 本地化资源 | `en.lproj/InfoPlist.strings` / `zh-Hans.lproj/InfoPlist.strings`（均只含 `CFBundleDisplayName`） |
 
@@ -284,15 +286,15 @@
 
 ### 🟡 代码债
 
-8. `Views/TacticalMapView.swift` 单文件 **1114 行**，内含 13 个 `private struct` + 3 个 `private enum` + 1 个 `Coordinator` 类（共 17 个内部类型），地图渲染 / 过滤 / 聚类 / 坐标换算 / 缩放容器 / 开发者工具全部堆在一起。
-9. `Views/MapListView.swift` 已实现但未接入根导航，用户看不到地图列表。**已确认是刻意设计**——V1 只做 Mirage，不需要地图列表前置；等开始增加第二张地图时再提升优先级（见 `## Next` 条件性任务）。
+8. `Views/TacticalMapView.swift` 仍有 **944 行**、13 个内部类型，但顶层筛选与导航已移到 `TacticsView`；地图文件仍同时包含渲染 / 聚类 / 坐标换算 / 缩放容器 / 开发者工具，后续仍可分段拆分。
+9. `Views/MapListView.swift` 已实现但未接入根导航。**这是刻意设计**——战术页顶部地图选择器已预留多地图 Context，V1 只有 Mirage 时不需要启动前置列表。
 10. **无测试 target**：搜索、聚类、坐标换算、收藏持久化、JSON 解码全部没有自动化覆盖；构建通过是唯一可自动化的验证手段。
 11. 地图缩放上限 4.0（`ZoomableScrollView` 的 `maxScale`），在 iPad 或大尺寸屏幕上的清晰度**待确认**。
 12. `LineupModels.swift` 中定义了名为 `Map` 的结构体，与 Swift 标准库（以及部分框架）的 `Map` 同名，跨模块引用时**可能产生歧义**（当前可编译，属命名隐患）。
 
 ### 🔵 文档与工程
 
-13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 95 个，差 34 个（搜索、收藏、设置、空状态相关）；该文档也未提及 V1 范围硬约束。
+13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 98 个，差 37 个；该文档也未提及 V1 范围硬约束。
     - 已排为 **P0-3**：目标是**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
     - **约束：不要为了补 key 而重构 App。** 详见 `## Next` P0 第 3 项。
 14. ✅ **README 已中文化并纳入同步维护**：文档描述当前实现与占位内容，`AGENTS.md` 文档索引已同步。详细进度仍只放在本文件；后续任务在 `Last Work` 记录 README 更新或无需更新的核对结论。
@@ -304,10 +306,28 @@
 
 17. **是否给数据模型增加占位标记字段**（如 `LineupVariant.isPlaceholder`）？当前 schema 没有该字段，而规则要求占位数据必须明确标记。涉及 `LineupModels.swift` + JSON 变更，需先确认。
 18. **真实 CS 道具数据的来源与授权**：图片和数据的版权归属直接决定 V1 能否安全发布，目前没有任何来源记录。
-19. `CODEX.md` 是否纳入 git？它内容详实且与源码一致，但纳管决定与提交时机需要单独明确，**不要与文档清理混在同一次提交里**。
+19. `CODEX.md` 是否纳入 git？它仍描述旧 Launcher 导航和旧文件名，本轮为保留既有未跟踪工作而未修改；纳管前应先与当前架构同步，并单独确认提交时机。
 20. `AboutView` 显示的版本号来自 `Bundle.main` 的 `CFBundleShortVersionString`（缺失时回退 `"1.0"`）；而 App 名称走的是 `L10n` 常量而非 Bundle。是否统一为只读 Bundle 元数据，待确认。
 
 ## Last Work
+
+### 2026-09-20 — 主界面与导航 UI/UX 重构
+
+- 根导航从 Launcher 式四功能卡 + 右上角设置，改为原生 `TabView`：战术 / 收藏 / 设置；每个 Tab 使用独立 `NavigationStack`，启动默认直接进入战术。
+- `TacticsView` 统一持有 `selectedMapID`、`selectedViewMode`、`selectedSide`、`selectedUtilityType`、`searchText`；地图/列表切换不会重置搜索或筛选。
+- 顶部地图选择器使用 `LineupStore.maps`，当前只显示真实存在的 Mirage；未虚构第二张地图。搜索改为 `.searchable` 内联实时过滤。
+- 地图引擎保留原有缩放、双击、聚类、点位导航和开发者坐标工具；只改为接收外部过滤后的 groups，并把地图容器调整为自适应战术页剩余空间。
+- `TacticsListView` 按区域分组展示 6 个已有方案，每行为“起点 → 目标点”、方案名、类型、阵营和收藏按钮；直接进入方案详情。
+- 搜索匹配字段保持原有范围：道具组 ID / mapId / 目标名 / 类型 / 阵营 / 分类，方案 ID / 名称 / 出生点·身位 / 起止区域 / 投掷方式 / 说明 / 难度；保留大小写、变音符与去空格匹配。
+- 将 `MirageDetailView.swift`、`UtilityListView.swift`、`LineupSearchView.swift` 分别重命名为 `TacticsView.swift`、`TacticsListView.swift`、`LineupSearch.swift`，并只在 `project.pbxproj` 同步对应文件引用和构建阶段注释；任务前已有的 Xcode 27 元数据差异原样保留。
+- 收藏继续复用同一个 `FavoriteStore` / `UserDefaults`，设置继续复用 `SettingsView`、`LanguageManager` 和 `DeveloperSettings`；数据模型、JSON、Assets 与 Scheme 未修改。
+- 新增 3 个双语 UI key：`tactics`、`mapView`、`listView`；搜索提示改为“搜索点位、道具或区域”。`L10n.Key` 现为 98 个，P0-3 文档差异更新为 37 个。
+- 验证：Debug 构建通过（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5）；模拟器检查中文浅色地图/列表、`window` 搜索、CT 空状态、收藏 Tab，以及英文设置 Tab 和英文深色列表。临时 QA 入口位于 `/tmp`，未写入仓库。
+- README 已同步三 Tab 导航、战术主页、共享筛选和内联搜索；`AGENTS.md` 已同步新根导航、地图责任边界及 key 数量。
+- 未跟踪的 `CODEX.md` 仍保留任务前内容，其中旧 Launcher 导航与旧文件名已过时；本轮不修改该既有文件，纳管前需单独同步。
+- 用户在完成汇报后批准进入提交与推送收口；提交范围只包含本轮 UI/UX、对应文档和 `project.pbxproj` 的 3 个文件重命名引用。任务前已有的 Xcode 27 升级元数据、`CODEX.md` 与 `图库/` 继续保留在本地。
+
+---
 
 ### 2026-09-19 — P0-2 完整产品流程检查
 
@@ -426,21 +446,20 @@
 
 ### 当前基线
 
-- 分支 `main`：任务前基线 `638c5dc` 与 P0-2 改动均已推送到 `origin/main`。
-- 工作区保留 Xcode 27 升级元数据差异、未跟踪的 `CODEX.md` 和用户本地 `图库/`；没有半成品功能代码。
-- 构建命令见 `AGENTS.md` 第 8 节；P0-2 修复后 Debug 构建通过（iPhone 17 + iOS 26.5 模拟器）。
-- 后续任务提交前检查 README，并在本文件 `Last Work` 记录同步章节或无需更新的原因；当前最高优先级为 P0-3。
+- 分支 `main`：UI/UX 重构已完成验证并获用户批准提交；任务前远程基线为 `6d56c1e`。
+- 任务前已存在的 Xcode 27 升级元数据差异、未跟踪 `CODEX.md` 和用户本地 `图库/` 仍保留；不要把它们混入后续提交。
+- 本轮 Debug 构建通过（iPhone 17 + iOS 26.5 模拟器），中英文、深浅色、地图/列表、搜索、空状态、收藏和设置已做代表性验证。
+- README 已与新导航同步；下一步为 P0-3 localization audit。
 
-### 建议的下一个任务：专项 localization audit（P0-3）
+### 建议的下一个任务：P0-3 localization audit
 
-**为什么是它**：P0-2 已确认现有主流程可用，当前剩余的交付前文档缺口是 `docs/LOCALIZATION.md` 登记的 key 比实际 `L10n.Key` 少 34 个。
+**为什么是它**：当前用户流程、主导航与交付资源配置已完成，规范文档仍比实际 `L10n.Key` 少 37 个条目。
 
 **执行边界**：
 
-- 对齐 `docs/LOCALIZATION.md` 与实际 `L10n.Key`（登记 61 / 实际 95，差 34 个）。
-- 确认中英文分支没有真正缺失，检查 `Views/` 下固定 UI 文案未被硬编码。
-- 把 V1 只做 Mirage 的范围约束补进本地化规范。
-- **以文档修正为主，不要为了补 key 重构 App。**若发现代码侧真正不一致，单独记录并做最小修复。
+- 对齐 `docs/LOCALIZATION.md` 与实际 98 个 `L10n.Key`（当前登记 61，差 37）。
+- 确认英文和简体中文分支覆盖一致，并检查 `Views/` 下没有新增硬编码固定文案。
+- 以文档修正为主；若发现真正的代码缺口，单独记录并最小修复，不做结构性重构。
 
 ### 内容填充任务（P1，不阻塞交付）
 
@@ -467,7 +486,7 @@
 
 - 不要在"产品流程检查"里夹带新功能；新需求只登记，不在本轮实现。
 - 不要为了补 localization key 而重构 App 或改动界面结构。
-- 不要顺手接入 `MapListView` 到根导航——**已确认刻意设计**，V1 只有一张地图；等开始加第二张地图时再提升优先级。
+- 不要把 `MapListView` 恢复成启动前置页——V1 只有 Mirage；第二张地图就绪时扩展战术页已有的顶部地图选择器。
 - 不要给开发者模式的坐标拖动加写回逻辑。
 - 不要通过静默 fallback 长期掩盖 JSON 数据错误。
 - 不要在没有明确理由时改动 `LineupModels.swift`、`project.pbxproj` 或 `lineups_mirage.json`。

@@ -7,8 +7,6 @@ struct TacticalMapView: View {
 
     @State private var selectedGroup: LineupGroup?
     @State private var selectedGroupCluster: LineupCluster?
-    @State private var selectedAreaFilter: MapAreaFilter = .featured
-    @State private var selectedTypeFilter: MapUtilityTypeFilter = .all
     @State private var currentZoomScale: CGFloat = 1.0
     @State private var showDeveloperTargets = true
     @State private var showDeveloperVariantStarts = true
@@ -19,41 +17,30 @@ struct TacticalMapView: View {
     @State private var copyStatusMessage: String?
 
     let map: Map
+    let groups: [LineupGroup]
 
-    private var groups: [LineupGroup] {
-        map.lineupGroups
-    }
-
-    private var filteredGroups: [LineupGroup] {
-        groups.filter { group in
-            selectedAreaFilter.matches(group)
-                && selectedTypeFilter.matches(group)
-        }
+    init(map: Map, groups: [LineupGroup]? = nil) {
+        self.map = map
+        self.groups = groups ?? map.lineupGroups
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            let availableWidth = max(geometry.size.width - AppTheme.pagePadding * 2, 1)
-            let reservedHeight: CGFloat = developerSettings.isDeveloperModeEnabled ? 420 : 176
-            let availableHeight = max(geometry.size.height - reservedHeight, 1)
-            let mapContainerSize = CGSize(width: availableWidth, height: availableHeight)
-            let mapImageSize = UIImage(named: map.imageName)?.size ?? CGSize(width: 1, height: 1)
-
-            VStack(spacing: 12) {
-                MapFilterBar(
-                    selectedAreaFilter: $selectedAreaFilter,
-                    selectedTypeFilter: $selectedTypeFilter
+        VStack(spacing: 10) {
+            if developerSettings.isDeveloperModeEnabled {
+                DeveloperDisplayControls(
+                    showTargets: $showDeveloperTargets,
+                    showVariantStarts: $showDeveloperVariantStarts,
+                    showLines: $showDeveloperLines
                 )
                 .environmentObject(languageManager)
+            }
 
-                if developerSettings.isDeveloperModeEnabled {
-                    DeveloperDisplayControls(
-                        showTargets: $showDeveloperTargets,
-                        showVariantStarts: $showDeveloperVariantStarts,
-                        showLines: $showDeveloperLines
-                    )
-                    .environmentObject(languageManager)
-                }
+            GeometryReader { geometry in
+                let mapContainerSize = CGSize(
+                    width: max(geometry.size.width, 1),
+                    height: max(geometry.size.height, 1)
+                )
+                let mapImageSize = UIImage(named: map.imageName)?.size ?? CGSize(width: 1, height: 1)
 
                 ZoomableScrollView(
                     minScale: 1.0,
@@ -66,7 +53,7 @@ struct TacticalMapView: View {
                         containerSize: mapContainerSize,
                         mapImageName: map.imageName,
                         imageSize: mapImageSize,
-                        groups: filteredGroups,
+                        groups: groups,
                         editedCoordinates: editedCoordinates,
                         developerModeEnabled: developerSettings.isDeveloperModeEnabled,
                         showDeveloperTargets: showDeveloperTargets,
@@ -106,27 +93,25 @@ struct TacticalMapView: View {
                     RoundedRectangle(cornerRadius: AppTheme.cardCornerRadius)
                         .stroke(AppTheme.secondaryText.opacity(0.35), lineWidth: 1)
                 }
-
-                Text(mapHintText)
-                    .font(.footnote)
-                    .foregroundStyle(AppTheme.secondaryText)
-
-                if developerSettings.isDeveloperModeEnabled {
-                    DeveloperCoordinatePanel(
-                        coordinate: activeCoordinate ?? lastEditedCoordinate,
-                        statusMessage: copyStatusMessage,
-                        onCopyCoordinates: copyCurrentCoordinates,
-                        onCopyJSON: copyJSONCoordinates
-                    )
-                    .environmentObject(languageManager)
-                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(AppTheme.pagePadding)
+
+            Text(mapHintText)
+                .font(.footnote)
+                .foregroundStyle(AppTheme.secondaryText)
+
+            if developerSettings.isDeveloperModeEnabled {
+                DeveloperCoordinatePanel(
+                    coordinate: activeCoordinate ?? lastEditedCoordinate,
+                    statusMessage: copyStatusMessage,
+                    onCopyCoordinates: copyCurrentCoordinates,
+                    onCopyJSON: copyJSONCoordinates
+                )
+                .environmentObject(languageManager)
+            }
         }
+        .padding(.horizontal, AppTheme.pagePadding)
+        .padding(.bottom, 8)
         .background(AppTheme.background)
-        .navigationTitle(map.name.value(for: languageManager))
-        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $selectedGroup) { group in
             LineupGroupDetailView(group: group)
         }
@@ -186,7 +171,7 @@ struct TacticalMapView: View {
     }
 
     private func copyJSONCoordinates() {
-        let jsonItems = groups.map { group in
+        let jsonItems = map.lineupGroups.map { group in
             let targetCoordinate = groupTargetCoordinate(for: group)
             let variants = group.variants.map { variant in
                 let startCoordinate = variantStartCoordinate(for: group, variant: variant)
@@ -254,53 +239,6 @@ struct TacticalMapView: View {
     }
 }
 
-private struct MapFilterBar: View {
-    @EnvironmentObject private var languageManager: LanguageManager
-
-    @Binding var selectedAreaFilter: MapAreaFilter
-    @Binding var selectedTypeFilter: MapUtilityTypeFilter
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            filterTitle(L10n.text(.mapFilterArea, for: languageManager))
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(MapAreaFilter.allCases) { filter in
-                        FilterChip(
-                            title: filter.displayName(for: languageManager),
-                            isSelected: selectedAreaFilter == filter
-                        ) {
-                            selectedAreaFilter = filter
-                        }
-                    }
-                }
-            }
-
-            filterTitle(L10n.text(.mapFilterUtilityType, for: languageManager))
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(MapUtilityTypeFilter.allCases) { filter in
-                        FilterChip(
-                            title: filter.displayName(for: languageManager),
-                            isSelected: selectedTypeFilter == filter
-                        ) {
-                            selectedTypeFilter = filter
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func filterTitle(_ title: String) -> some View {
-        Text(title)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(.secondary)
-    }
-}
-
 private struct DeveloperDisplayControls: View {
     @EnvironmentObject private var languageManager: LanguageManager
 
@@ -316,25 +254,6 @@ private struct DeveloperDisplayControls: View {
         }
         .font(.caption)
         .toggleStyle(.switch)
-    }
-}
-
-private struct FilterChip: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(isSelected ? .white : .primary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(isSelected ? AppTheme.accent : AppTheme.cardBackground)
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -745,95 +664,6 @@ private struct ClusterLineupSheet: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .presentationDetents([.medium])
-    }
-}
-
-private enum MapAreaFilter: CaseIterable, Hashable, Identifiable {
-    case featured
-    case aSite
-    case bSite
-    case mid
-    case tSide
-    case ctSide
-
-    var id: Self {
-        self
-    }
-
-    func displayName(for languageManager: LanguageManager) -> String {
-        switch self {
-        case .featured:
-            return L10n.text(.mapFilterFeatured, for: languageManager)
-        case .aSite:
-            return LineupCategory.aSite.displayName(for: languageManager)
-        case .bSite:
-            return LineupCategory.bSite.displayName(for: languageManager)
-        case .mid:
-            return LineupCategory.mid.displayName(for: languageManager)
-        case .tSide:
-            return LineupCategory.tSide.displayName(for: languageManager)
-        case .ctSide:
-            return LineupCategory.ctSide.displayName(for: languageManager)
-        }
-    }
-
-    func matches(_ group: LineupGroup) -> Bool {
-        switch self {
-        case .featured:
-            return group.isFeatured
-        case .aSite:
-            return group.category == .aSite
-        case .bSite:
-            return group.category == .bSite
-        case .mid:
-            return group.category == .mid
-        case .tSide:
-            return group.category == .tSide
-        case .ctSide:
-            return group.category == .ctSide
-        }
-    }
-}
-
-private enum MapUtilityTypeFilter: CaseIterable, Hashable, Identifiable {
-    case all
-    case smoke
-    case flash
-    case molotov
-    case he
-
-    var id: Self {
-        self
-    }
-
-    func displayName(for languageManager: LanguageManager) -> String {
-        switch self {
-        case .all:
-            return L10n.text(.mapFilterAll, for: languageManager)
-        case .smoke:
-            return UtilityType.smoke.displayName(for: languageManager)
-        case .flash:
-            return UtilityType.flash.displayName(for: languageManager)
-        case .molotov:
-            return UtilityType.molotov.displayName(for: languageManager)
-        case .he:
-            return UtilityType.he.displayName(for: languageManager)
-        }
-    }
-
-    func matches(_ group: LineupGroup) -> Bool {
-        switch self {
-        case .all:
-            return true
-        case .smoke:
-            return group.type == .smoke
-        case .flash:
-            return group.type == .flash
-        case .molotov:
-            return group.type == .molotov
-        case .he:
-            return group.type == .he
-        }
     }
 }
 

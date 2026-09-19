@@ -3,6 +3,9 @@ import Foundation
 enum L10n {
     enum Key {
         case maps
+        case tactics
+        case mapView
+        case listView
         case mirage
         case lineupCount(Int)
         case variantCount(Int)
@@ -112,6 +115,12 @@ enum L10n {
         switch key {
         case .maps:
             return "Maps"
+        case .tactics:
+            return "Tactics"
+        case .mapView:
+            return "Map"
+        case .listView:
+            return "List"
         case .mirage:
             return "Mirage"
         case .lineupCount(let count):
@@ -269,7 +278,7 @@ enum L10n {
         case .search:
             return "Search"
         case .searchPrompt:
-            return "Search utility lineups"
+            return "Search locations, utility, or areas"
         case .searchHint:
             return "Search by utility name, variant, area, type, start position, or target."
         case .searchNoResults:
@@ -307,6 +316,12 @@ enum L10n {
         switch key {
         case .maps:
             return "地图"
+        case .tactics:
+            return "战术"
+        case .mapView:
+            return "地图"
+        case .listView:
+            return "列表"
         case .mirage:
             return "Mirage"
         case .lineupCount(let count):
@@ -464,7 +479,7 @@ enum L10n {
         case .search:
             return "搜索"
         case .searchPrompt:
-            return "搜索道具"
+            return "搜索点位、道具或区域"
         case .searchHint:
             return "可搜索道具名称、丢法、区域、类型、站位或目标点。"
         case .searchNoResults:

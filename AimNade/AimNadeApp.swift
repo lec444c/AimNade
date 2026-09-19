@@ -8,22 +8,40 @@ struct AimNadeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                MirageDetailView(map: LineupStore.mirageMap)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                SettingsView()
-                            } label: {
-                                Image(systemName: "gearshape")
-                            }
-                            .accessibilityLabel(L10n.text(.settings, for: languageManager))
-                        }
-                    }
-            }
-            .environmentObject(languageManager)
-            .environmentObject(developerSettings)
-            .environmentObject(favoriteStore)
+            MainTabView()
+                .environmentObject(languageManager)
+                .environmentObject(developerSettings)
+                .environmentObject(favoriteStore)
         }
+    }
+}
+
+private struct MainTabView: View {
+    @EnvironmentObject private var languageManager: LanguageManager
+
+    var body: some View {
+        TabView {
+            NavigationStack {
+                TacticsView(maps: LineupStore.maps)
+            }
+            .tabItem {
+                Label(L10n.text(.tactics, for: languageManager), systemImage: "map")
+            }
+
+            NavigationStack {
+                FavoritesView(map: LineupStore.mirageMap)
+            }
+            .tabItem {
+                Label(L10n.text(.favorites, for: languageManager), systemImage: "star")
+            }
+
+            NavigationStack {
+                SettingsView()
+            }
+            .tabItem {
+                Label(L10n.text(.settings, for: languageManager), systemImage: "gearshape")
+            }
+        }
+        .tint(AppTheme.accent)
     }
 }
