@@ -108,6 +108,19 @@ enum UtilityType: String, CaseIterable, Hashable, Codable {
         }
     }
 
+    var systemImageName: String {
+        switch self {
+        case .smoke:
+            return "cloud.fill"
+        case .flash:
+            return "sun.max.fill"
+        case .molotov:
+            return "flame.fill"
+        case .he:
+            return "burst.fill"
+        }
+    }
+
     var color: Color {
         switch self {
         case .smoke:

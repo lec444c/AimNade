@@ -30,12 +30,13 @@
 
 ## 3. V1 范围（硬约束）
 
-**V1 只做 Mirage 这一张地图。**
+**V1 内置 Mirage、Ancient、Nuke 三张 2D 地图；当前只有 Mirage 具备道具数据和完整学习流程。**
 
 V1 要做：
 
-- 2D 战术地图（点位、过滤、聚类、缩放）。
-- 截图教学：每个投掷方案用「站位图 / 瞄点图 / 结果图」三张截图讲解。
+- Mirage / Ancient / Nuke 顶部切换与可缩放 2D 地图。
+- Mirage 道具点位、过滤、聚类与详情流程。
+- Mirage 截图教学：每个投掷方案用「站位图 / 瞄点图 / 结果图」三张截图讲解。
 - 分类列表、搜索、收藏、详情页、关于页。
 - 简体中文 + 英文双语。
 
@@ -47,15 +48,15 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 - ❌ 后端服务 / 云同步
 - ❌ 用户投稿 / UGC
 
-> 注意：`UtilityType` 与 `LineupCategory` 已包含 Flash / Molotov / HE 与 B 包点 / CT 方等 V1 之外的取值。**枚举已支持 ≠ 内容已存在**，不要据此认为功能已完成。
+> 注意：`UtilityType` 与 `LineupCategory` 已包含 Flash / Molotov / HE 与 B 包点 / CT 方等当前无数据的取值。**枚举已支持 ≠ 内容已存在**，不要据此认为功能已完成。
 
 ### 已确认的架构决定（不要当作"待修的 bug"）
 
 | 现状 | 决定 | 触发重新评估的条件 |
 |---|---|---|
-| `LineupStore.maps` 只含 Mirage；`MapListView` 未接入根导航 | **刻意设计**。V1 只做 Mirage，战术页顶部地图选择器已作为全页 Context，不需要地图列表前置 | **开始增加第二张地图时**再向 `LineupStore.maps` 接入真实数据并验证战术页切换 |
+| `LineupStore.maps` 含 Mirage / Ancient / Nuke；`MapListView` 未接入根导航 | **刻意设计**。地图直接在战术页顶部切换；Ancient / Nuke 暂时是只读地图预览，不伪造道具数据 | 有可核验的 Ancient / Nuke 道具数据与教学素材时，再为对应地图接入完整学习流程 |
 | `LineupStore` 在 JSON 失败时回退空 `Map` | 保留 fallback（防 crash）**没有问题**；但"静默"需要改 | 后续任务：Debug 输出明确错误 + Release 显示 empty state |
-| `docs/LOCALIZATION.md` key 清单滞后 37 个 | **本轮不补**，不做零散修补 | 一次专项 localization audit 统一对齐 |
+| `docs/LOCALIZATION.md` key 清单滞后 39 个 | **本轮不补**，不做零散修补 | 一次专项 localization audit 统一对齐 |
 
 ## 4. 命名与本地化规则
 
@@ -63,19 +64,20 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 - 固定 UI 文案**必须**接入现有本地化系统：`L10n.Key` → 英文分支 → 简体中文分支，三处同步。**禁止**在 View 中硬写用户可见文本。
 - JSON 中的业务内容使用 `LocalizedText`（`en` / `zhHans`），**不**放进 `L10n`。
 - **图片资源名、代码变量名、数据 ID 一律使用英文**，不汉化。
-- `L10n.Key` 当前有 98 个 case。`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记了 61 个，**新增文案时以 `L10n.swift` 为准**，不要照抄清单。
+- `L10n.Key` 当前有 100 个 case。`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记了 61 个，**新增文案时以 `L10n.swift` 为准**，不要照抄清单。
 - 提交前自检：在 `Views/` 下搜索 `Text("`、`Label("`、`Section("`、`navigationTitle("`，确认没有硬编码的固定文案（纯数字插值、已本地化的插值属合规）。
 
 ## 5. 数据规则
 
-- **唯一内容数据源**：`AimNade/Data/lineups_mirage.json`，由 `LineupStore` 从 App Bundle 读取。
+- **当前唯一的道具内容数据源**：`AimNade/Data/lineups_mirage.json`，由 `LineupStore` 从 App Bundle 读取。Ancient / Nuke 只在 `LineupStore` 中定义地图名称与图片资源，`lineupGroups` 为空。
 - JSON 结构必须与 `AimNade/Models/LineupModels.swift` 中的 `Map` / `LineupGroup` / `LineupVariant` 保持一致（`Codable`，字段名必须逐字匹配，缺失的可选字段会导致解码整体失败）。
 - 改动数据后必须检查：**ID 唯一性**、坐标取值范围（`0…1` 归一化）、枚举取值（`UtilityType` / `LineupCategory` / `difficulty`）、以及引用的图片资源名是否真实存在。
 - `LineupStore` 在 JSON 缺失或解码失败时会**静默回退为空 `Map`，不会向用户报错**。改动 JSON 后必须在 App 内确认内容可见，**不能只看构建是否通过**。
   - 保留 fallback 以防止 App crash 是可以接受的；**但"静默失败"不是最终设计**（已确认的决定）。改进方向：Debug 环境输出明确的 JSON decode / load 错误，Release / UI 层显示合理的 empty state。**不要通过静默 fallback 长期掩盖数据错误**，也不要把它当作已完成的错误处理。
-  - V1 只支持 Mirage 是刻意设计，`Data/` 下只有 `lineups_mirage.json`。
+  - `Data/` 下只有 `lineups_mirage.json`；这表示只有 Mirage 具备道具内容，不影响 Ancient / Nuke 地图图片预览。
 - **不编造真实 CS 道具数据**。
   - 当前仓库内的 Mirage 内容属于**占位/示例数据**：数值坐标是手工挑的，教学图片资源尚不存在，内容未与真实游戏对拍。**在文档与回复中必须如此标注，不得描述为"已核实的真实道具数据"。**
+  - Ancient / Nuke 当前只有用户提供的中文标注 JPEG 地图，没有道具组、投掷方案或教学截图。不得把地图预览描述成已有战术内容。
   - 允许新增明确标记的占位数据；一旦录入真实数据，必须在提交信息 / `PROJECT_STATUS.md` 中写明来源与核验方式。
   - 当前 JSON schema **没有** `isPlaceholder` 之类的标记字段。是否新增属于数据模型变更，需按第 7 节流程处理（见 `PROJECT_STATUS.md` 的待确认项）。
 
@@ -92,9 +94,9 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 
 | 资产 | 位置 | 说明 |
 |---|---|---|
-| `AppTheme` | `Theme/AppTheme.swift` | 颜色、圆角、间距的唯一来源 |
+| `AppTheme` | `Theme/AppTheme.swift` | 品牌蓝、战术橙、地图主题色、语义色、圆角与间距的唯一来源 |
 | `FeatureCard` | `Views/Components/FeatureCard.swift` | 历史功能卡组件；当前三 Tab 主导航不再使用 |
-| `MapMarkerView` | `Views/Components/MapMarkerView.swift` | 道具圆点标记（含开发者坐标浮层） |
+| `MapMarkerView` | `Views/Components/MapMarkerView.swift` | 道具图形标记、选中态与开发者坐标浮层 |
 | `UtilityBadge` | `Views/Components/UtilityBadge.swift` | 类型 / 阵营 / 分类 / 难度徽章 |
 | `EmptyStateView` | `Views/EmptyStateView.swift` | 统一空状态 |
 | `ZoomableScrollView` | `Views/TacticalMapView.swift` | 地图缩放容器（`UIViewRepresentable`） |
@@ -107,8 +109,8 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 
 - 开发者模式中的坐标拖动**只存在于页面 `@State` 中**，不会写回 JSON。不要把它当作已持久化数据，**也不要擅自为它添加写回逻辑**。
 - 保持本地优先设计：不引入网络、账号、数据库或第三方依赖。
-- 不要继续把不相关职责堆进单个巨型 View。`Views/TacticalMapView.swift`（944 行，内含 13 个内部类型）仍较大，**新增顶层筛选与导航逻辑应留在 `TacticsView`，不再塞回地图引擎**。
-- `Views/MapListView.swift` 已实现但**未接入根导航**；`AimNadeApp.swift` 的根视图为战术 / 收藏 / 设置三 Tab，战术 Tab 直接进入 `TacticsView`。V1 只有 Mirage，因此不另行前置地图列表；第二张地图就绪时直接扩展现有顶部地图选择器。
+- 不要继续把不相关职责堆进单个巨型 View。`Views/TacticalMapView.swift`（1105 行，内含 13 个内部类型）仍较大，**新增顶层筛选与导航逻辑应留在 `TacticsView`，不再塞回地图引擎**。
+- `Views/MapListView.swift` 已实现但**未接入根导航**；`AimNadeApp.swift` 的根视图为战术 / 收藏 / 设置三 Tab，战术 Tab 直接进入 `TacticsView`。三张地图都通过战术页顶部选择器切换，不另行恢复前置地图列表。
 
 ## 8. 常用命令
 
@@ -123,7 +125,7 @@ xcodebuild -project AimNade.xcodeproj -scheme AimNade -showdestinations
 
 改动后至少跑一次构建命令；由于没有测试，构建通过是当前唯一可自动化的验证手段。
 
-最近一次验证的工具链：**Xcode 27.0（Build 27A266a）+ iOS 26.5 模拟器**，在 `737fdaf` 上得到 `BUILD SUCCEEDED`。换用**更旧**的 Xcode 打开工程会再次改写 `project.pbxproj` 的 `LastUpgradeCheck` 等字段，因此看到这类 diff 时先确认是不是工具链差异，而不是功能改动。
+最近一次验证的工具链：**Xcode 27.0（Build 27A266a）+ iOS 26.5 模拟器**；三地图接入后得到 `BUILD SUCCEEDED`。换用**更旧**的 Xcode 打开工程会再次改写 `project.pbxproj` 的 `LastUpgradeCheck` 等字段，因此看到这类 diff 时先确认是不是工具链差异，而不是功能改动。
 
 ## 9. 工程文件注意事项
 
@@ -154,7 +156,7 @@ xcodebuild -project AimNade.xcodeproj -scheme AimNade -showdestinations
 | `AGENTS.md` | 本文件：长期约束与交接机制 | ✅ 已提交 | 维护中 |
 | `PROJECT_STATUS.md` | 当前进度快照（**每次任务后更新**） | ✅ 已提交 | 维护中 |
 | `CODEX.md` | 完整架构、功能清单、路线图 | ❌ **未跟踪** | 仍描述旧 Launcher 导航；本轮遵守既有工作边界未修改，纳管前需同步 |
-| `docs/LOCALIZATION.md` | 本地化规范 + 核心 key 清单 | ✅ 已跟踪 | 规范有效；key 清单滞后 37 个，待专项 audit |
+| `docs/LOCALIZATION.md` | 本地化规范 + 核心 key 清单 | ✅ 已跟踪 | 规范有效；key 清单滞后 39 个，待专项 audit |
 | `README.md` | 中文项目介绍、功能、结构与运行指南（**不作为 AI 进度日志**） | ✅ 已跟踪 | 按第 10 节随相关变更同步维护 |
 
 > 进度记录的**唯一**去处是 `PROJECT_STATUS.md`。不要把进度写进 `README.md`，也不要在 `CODEX.md` 里维护状态。

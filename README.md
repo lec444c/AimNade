@@ -2,15 +2,16 @@
 
 AimNade 是面向 Counter-Strike 玩家、以本地内容驱动的战术道具学习 iOS App。通过 2D 地图、分类列表与投掷方案详情，帮助玩家查找和学习道具点位。
 
-当前为 **Mirage 单地图 MVP**，支持 iPhone 与 iPad。所有内容随 App 打包，收藏与偏好保存在设备本地，无需联网或登录。
+当前内置 **Mirage、Ancient、Nuke** 三张 2D 地图，支持 iPhone 与 iPad。所有内容随 App 打包，收藏与偏好保存在设备本地，无需联网或登录。
 
-> 当前内置内容是**未经实战核验的占位 / 示例数据**：共 3 个道具组、6 个投掷方案，均为 T 方烟雾弹。18 张教学截图尚未提供，界面显示占位图。请勿将这些内容当作已验证的实战教学。
+> 只有 Mirage 内置道具内容，而且仍是**未经实战核验的占位 / 示例数据**：共 3 个道具组、6 个投掷方案，均为 T 方烟雾弹。18 张教学截图尚未提供。Ancient 与 Nuke 当前只提供地图预览，没有道具点位。
 
 ## 已实现功能
 
-- **三栏主导航**：底部只保留战术、收藏、设置三个 Tab；启动后直接进入 Mirage 战术环境，不再经过功能入口页。
-- **2D 战术地图**：默认直接显示地图，支持平移、双指缩放、双击缩放与点位聚类；点击点位可查看道具组详情。
-- **地图 / 列表双视图**：两种视图共享当前地图、搜索、道具类型和 T / CT 阵营筛选；列表按区域分组，直接显示“起点 → 目标点”。
+- **三栏主导航**：底部只保留战术、收藏、设置三个 Tab；启动后直接进入战术页，从顶部切换 Mirage / Ancient / Nuke。
+- **三地图 2D 预览**：每张地图都支持平移、双指缩放和双击缩放；Mirage 使用蓝橙主题，Ancient 使用绿色主题，Nuke 使用蓝色主题。
+- **Mirage 战术交互**：支持点位聚类；点击点位先显示可收藏的道具预览卡，再进入详情。Ancient / Nuke 在没有道具数据时使用简化的地图预览界面。
+- **地图 / 列表双视图**：Mirage 的两种视图共享搜索、道具类型和 T / CT 阵营筛选；筛选项显示当前可用数量，列表按区域分组并直接显示“起点 → 目标点”。
 - **投掷方案详情**：查看身位要求、起止区域、投掷方式、难度与说明。
 - **教学图片浏览**：已实现站位图、瞄点图、结果图的折叠展示、全屏分页和缩放；当前资源缺失时使用占位图。
 - **内联中英文搜索**：战术页顶部实时过滤道具名称、起点、目标点、区域与道具类型，支持大小写折叠和去空格匹配。
@@ -29,7 +30,7 @@ AimNade 是面向 Counter-Strike 玩家、以本地内容驱动的战术道具�
 | 最低系统 | iOS 17.0 |
 | 设备 | iPhone、iPad |
 | 工程 | `AimNade.xcodeproj`，单一 Target / Scheme：`AimNade` |
-| 数据 | App Bundle 内的 JSON，使用 `Codable` 解码 |
+| 数据 | App Bundle 内的 JSON 与本地地图资源；JSON 使用 `Codable` 解码 |
 | 本地存储 | `UserDefaults`：收藏、语言偏好、开发者模式开关 |
 | UIKit 桥接 | 地图与图片缩放、剪贴板导出 |
 | 第三方依赖 | 无，无需安装 SPM / CocoaPods / Carthage 依赖 |
@@ -79,16 +80,17 @@ docs/                       专项开发文档
 
 当前采用轻量分层的 SwiftUI 架构。App 根视图为 `TabView`，战术、收藏、设置各自使用独立 `NavigationStack`。`TacticsView` 统一持有当前地图、地图/列表模式、阵营、道具类型和搜索状态，再把同一份过滤结果交给地图或列表展示。
 
-数据链路为：`lineups_mirage.json` → `LineupStore` → `Map` → `LineupGroup` → `LineupVariant` → 页面展示。`MapListView` 尚未接入启动导航，V1 无需先选择地图。
+地图链路为：`LineupStore.maps` → `TacticsView` 顶部选择器 → 对应地图页面。Mirage 的道具数据链路为：`lineups_mirage.json` → `LineupStore.mirageMap` → `Map` → `LineupGroup` → `LineupVariant`。Ancient / Nuke 目前是 `lineupGroups` 为空的地图预览。`MapListView` 仍未接入根导航，地图切换不需要额外前置页。
 
 ## 内容维护与当前限制
 
-- 唯一内容源是 [AimNade/Data/lineups_mirage.json](AimNade/Data/lineups_mirage.json)，字段需与 [LineupModels.swift](AimNade/Models/LineupModels.swift) 保持一致。
+- 当前唯一的道具内容源是 [AimNade/Data/lineups_mirage.json](AimNade/Data/lineups_mirage.json)，字段需与 [LineupModels.swift](AimNade/Models/LineupModels.swift) 保持一致。
+- Ancient / Nuke 使用用户提供的中文标注 JPEG 地图，文字已烘焙进图片，因此切换到英文界面后地图标注仍为中文。正式发布前还需确认两张图片的使用授权。
 - 道具组表示同一目标点的一组投掷方案；每个方案记录位置、投掷说明及三张教学图的资源名。地图坐标为 `0…1` 归一化值。
 - 业务文本使用 `LocalizedText` 的 `en` / `zhHans` 字段；固定界面文案通过 `L10n` 管理。
 - 教学图需加入 `Assets.xcassets`，资源名须与 JSON 完全一致。真实数据及图片应记录来源、授权情况与游戏内核验方式。
 - JSON 加载失败时目前回退为空地图，尚无明确错误提示；改动数据后需实际运行确认内容可见。
-- V1 范围为 Mirage、本地数据、2D 地图和图文教学；不包含 3D、视频、账号、后端或用户投稿。
+- V1 范围为 Mirage / Ancient / Nuke 三张本地 2D 地图；完整道具学习内容目前仅位于 Mirage。不包含 3D、视频、账号、后端或用户投稿。
 
 ## 后续方向
 

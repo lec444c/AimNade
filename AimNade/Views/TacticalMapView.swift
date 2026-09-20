@@ -4,8 +4,8 @@ import UIKit
 struct TacticalMapView: View {
     @EnvironmentObject private var languageManager: LanguageManager
     @EnvironmentObject private var developerSettings: DeveloperSettings
-
-    @State private var selectedGroup: LineupGroup?
+    @State private var navigationGroup: LineupGroup?
+    @State private var previewGroup: LineupGroup?
     @State private var selectedGroupCluster: LineupCluster?
     @State private var currentZoomScale: CGFloat = 1.0
     @State private var showDeveloperTargets = true
@@ -18,10 +18,19 @@ struct TacticalMapView: View {
 
     let map: Map
     let groups: [LineupGroup]
+    let accentColor: Color
+    let showsEmptyState: Bool
 
-    init(map: Map, groups: [LineupGroup]? = nil) {
+    init(
+        map: Map,
+        groups: [LineupGroup]? = nil,
+        accentColor: Color = AppTheme.tacticalOrange,
+        showsEmptyState: Bool = true
+    ) {
         self.map = map
         self.groups = groups ?? map.lineupGroups
+        self.accentColor = accentColor
+        self.showsEmptyState = showsEmptyState
     }
 
     var body: some View {
@@ -36,70 +45,124 @@ struct TacticalMapView: View {
             }
 
             GeometryReader { geometry in
-                let mapContainerSize = CGSize(
-                    width: max(geometry.size.width, 1),
-                    height: max(geometry.size.height, 1)
-                )
                 let mapImageSize = UIImage(named: map.imageName)?.size ?? CGSize(width: 1, height: 1)
+                let mapContainerSize = fittedMapContainerSize(
+                    imageSize: mapImageSize,
+                    availableSize: geometry.size
+                )
 
-                ZoomableScrollView(
-                    minScale: 1.0,
-                    maxScale: 4.0,
-                    doubleTapScale: 2.5,
-                    isPointEditingEnabled: developerSettings.isDeveloperModeEnabled,
-                    zoomScale: $currentZoomScale
-                ) {
-                    MapCanvas(
-                        containerSize: mapContainerSize,
-                        mapImageName: map.imageName,
-                        imageSize: mapImageSize,
-                        groups: groups,
-                        editedCoordinates: editedCoordinates,
-                        developerModeEnabled: developerSettings.isDeveloperModeEnabled,
-                        showDeveloperTargets: showDeveloperTargets,
-                        showDeveloperVariantStarts: showDeveloperVariantStarts,
-                        showDeveloperLines: showDeveloperLines,
-                        zoomScale: currentZoomScale,
-                        onSelect: { group in
-                            selectedGroup = group
-                        },
-                        onSelectCluster: { cluster in
-                            selectedGroupCluster = cluster
-                        },
-                        onCoordinateChanged: { group, variant, kind, coordinate in
-                            updateEditedCoordinate(
-                                group: group,
-                                variant: variant,
-                                kind: kind,
-                                coordinate: coordinate,
-                                isFinished: false
-                            )
-                        },
-                        onCoordinateEnded: { group, variant, kind, coordinate in
-                            updateEditedCoordinate(
-                                group: group,
-                                variant: variant,
-                                kind: kind,
-                                coordinate: coordinate,
-                                isFinished: true
-                            )
+                ZStack(alignment: .bottom) {
+                    ZoomableScrollView(
+                        minScale: 1.0,
+                        maxScale: 4.0,
+                        doubleTapScale: 2.5,
+                        isPointEditingEnabled: developerSettings.isDeveloperModeEnabled,
+                        zoomScale: $currentZoomScale
+                    ) {
+                        MapCanvas(
+                            containerSize: mapContainerSize,
+                            mapImageName: map.imageName,
+                            imageSize: mapImageSize,
+                            groups: groups,
+                            selectedGroupID: visiblePreviewGroup?.id,
+                            editedCoordinates: editedCoordinates,
+                            developerModeEnabled: developerSettings.isDeveloperModeEnabled,
+                            showDeveloperTargets: showDeveloperTargets,
+                            showDeveloperVariantStarts: showDeveloperVariantStarts,
+                            showDeveloperLines: showDeveloperLines,
+                            zoomScale: currentZoomScale,
+                            onSelect: { group in
+                                withAnimation(.snappy(duration: 0.24)) {
+                                    previewGroup = group
+                                }
+                            },
+                            onSelectCluster: { cluster in
+                                selectedGroupCluster = cluster
+                            },
+                            onCoordinateChanged: { group, variant, kind, coordinate in
+                                updateEditedCoordinate(
+                                    group: group,
+                                    variant: variant,
+                                    kind: kind,
+                                    coordinate: coordinate,
+                                    isFinished: false
+                                )
+                            },
+                            onCoordinateEnded: { group, variant, kind, coordinate in
+                                updateEditedCoordinate(
+                                    group: group,
+                                    variant: variant,
+                                    kind: kind,
+                                    coordinate: coordinate,
+                                    isFinished: true
+                                )
+                            }
+                        )
+                        .environmentObject(languageManager)
+                    }
+                    .frame(width: mapContainerSize.width, height: mapContainerSize.height)
+                    .clipShape(RoundedRectangle(cornerRadius: AppTheme.mapCornerRadius, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: AppTheme.mapCornerRadius, style: .continuous)
+                            .stroke(accentColor.opacity(0.24), lineWidth: 1)
+                    }
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 5)
+
+                    if showsEmptyState,
+                       groups.isEmpty,
+                       !developerSettings.isDeveloperModeEnabled {
+                        Label(
+                            L10n.text(.emptyUtilities, for: languageManager),
+                            systemImage: "tray"
+                        )
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(accentColor)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Capsule())
+                        .overlay {
+                            Capsule()
+                                .stroke(accentColor.opacity(0.24), lineWidth: 1)
                         }
-                    )
-                    .environmentObject(languageManager)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        .padding(12)
+                        .allowsHitTesting(false)
+                    }
+
+                    if !developerSettings.isDeveloperModeEnabled,
+                       visiblePreviewGroup == nil,
+                       !groups.isEmpty {
+                        Label(mapHintText, systemImage: "hand.tap.fill")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(AppTheme.primaryText)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Capsule())
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .padding(12)
+                            .allowsHitTesting(false)
+                    }
+
+                    if !developerSettings.isDeveloperModeEnabled,
+                       let group = visiblePreviewGroup {
+                        MapLineupPreviewCard(group: group) {
+                            navigationGroup = group
+                        }
+                        .padding(12)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
                 .frame(width: mapContainerSize.width, height: mapContainerSize.height)
-                .clipShape(RoundedRectangle(cornerRadius: AppTheme.cardCornerRadius))
-                .overlay {
-                    RoundedRectangle(cornerRadius: AppTheme.cardCornerRadius)
-                        .stroke(AppTheme.secondaryText.opacity(0.35), lineWidth: 1)
-                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
 
-            Text(mapHintText)
-                .font(.footnote)
-                .foregroundStyle(AppTheme.secondaryText)
-
             if developerSettings.isDeveloperModeEnabled {
+                Text(mapHintText)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.secondaryText)
+
                 DeveloperCoordinatePanel(
                     coordinate: activeCoordinate ?? lastEditedCoordinate,
                     statusMessage: copyStatusMessage,
@@ -112,18 +175,29 @@ struct TacticalMapView: View {
         .padding(.horizontal, AppTheme.pagePadding)
         .padding(.bottom, 8)
         .background(AppTheme.background)
-        .navigationDestination(item: $selectedGroup) { group in
+        .navigationDestination(item: $navigationGroup) { group in
             LineupGroupDetailView(group: group)
         }
         .sheet(item: $selectedGroupCluster) { cluster in
             ClusterLineupSheet(cluster: cluster) { group in
                 selectedGroupCluster = nil
                 DispatchQueue.main.async {
-                    selectedGroup = group
+                    withAnimation(.snappy(duration: 0.24)) {
+                        previewGroup = group
+                    }
                 }
             }
             .environmentObject(languageManager)
         }
+    }
+
+    private var visiblePreviewGroup: LineupGroup? {
+        guard let previewGroup,
+              groups.contains(where: { $0.id == previewGroup.id }) else {
+            return nil
+        }
+
+        return previewGroup
     }
 
     private var mapHintText: String {
@@ -132,6 +206,19 @@ struct TacticalMapView: View {
         }
 
         return L10n.text(.tapUtilityHint, for: languageManager)
+    }
+
+    private func fittedMapContainerSize(imageSize: CGSize, availableSize: CGSize) -> CGSize {
+        let availableWidth = max(availableSize.width, 1)
+        let availableHeight = max(availableSize.height, 1)
+        let imageRatio = max(imageSize.width / max(imageSize.height, 1), 0.01)
+        let availableRatio = availableWidth / availableHeight
+
+        if imageRatio > availableRatio {
+            return CGSize(width: availableWidth, height: availableWidth / imageRatio)
+        }
+
+        return CGSize(width: availableHeight * imageRatio, height: availableHeight)
     }
 
     private func updateEditedCoordinate(
@@ -266,6 +353,7 @@ private struct MapCanvas: View {
     let mapImageName: String
     let imageSize: CGSize
     let groups: [LineupGroup]
+    let selectedGroupID: String?
     let editedCoordinates: [MapPointKey: CGPoint]
     let developerModeEnabled: Bool
     let showDeveloperTargets: Bool
@@ -290,17 +378,7 @@ private struct MapCanvas: View {
                 .scaledToFit()
                 .frame(width: containerSize.width, height: containerSize.height)
 
-            if groups.isEmpty {
-                EmptyStateView(
-                    systemImage: "tray",
-                    title: L10n.text(.emptyUtilities, for: languageManager),
-                    message: L10n.text(.emptyUtilitiesMessage, for: languageManager)
-                )
-                .padding(18)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(20)
-            } else if developerModeEnabled {
+            if developerModeEnabled {
                 if showDeveloperLines {
                     ForEach(groups) { group in
                         ForEach(group.variants) { variant in
@@ -363,7 +441,10 @@ private struct MapCanvas: View {
                         Button {
                             onSelect(group)
                         } label: {
-                            UtilityPoint(group: group)
+                            UtilityPoint(
+                                group: group,
+                                isSelected: selectedGroupID == group.id
+                            )
                         }
                         .buttonStyle(.plain)
                         .frame(width: 44, height: 44)
@@ -566,15 +647,95 @@ private struct UtilityPoint: View {
     @EnvironmentObject private var languageManager: LanguageManager
 
     let group: LineupGroup
+    var isSelected = false
 
     var body: some View {
         MapMarkerView(
             type: group.type,
-            markerSize: 28
+            markerSize: 28,
+            isSelected: isSelected
         )
             .accessibilityLabel(
                 "\(group.targetName.value(for: languageManager)), \(group.type.displayName(for: languageManager))"
             )
+    }
+}
+
+private struct MapLineupPreviewCard: View {
+    @EnvironmentObject private var languageManager: LanguageManager
+    @EnvironmentObject private var favoriteStore: FavoriteStore
+
+    let group: LineupGroup
+    let onOpen: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Button(action: onOpen) {
+                HStack(spacing: 10) {
+                    MapMarkerView(
+                        type: group.type,
+                        markerSize: 32,
+                        isSelected: true
+                    )
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(group.targetName.value(for: languageManager))
+                            .font(.headline)
+                            .foregroundStyle(AppTheme.primaryText)
+                            .lineLimit(1)
+
+                        HStack(spacing: 7) {
+                            UtilityBadge.utilityType(group.type, for: languageManager)
+
+                            Text(L10n.text(.variantCount(group.variants.count), for: languageManager))
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(AppTheme.secondaryText)
+                        }
+                    }
+
+                    Spacer(minLength: 6)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.secondaryText)
+                }
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                favoriteStore.toggleGroup(group)
+            } label: {
+                Image(
+                    systemName: favoriteStore.isFavoriteGroup(group)
+                        ? "star.fill"
+                        : "star"
+                )
+                .font(.body.weight(.semibold))
+                .foregroundStyle(
+                    favoriteStore.isFavoriteGroup(group)
+                        ? AppTheme.tacticalOrange
+                        : AppTheme.accent
+                )
+                .frame(width: 38, height: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                L10n.text(
+                    favoriteStore.isFavoriteGroup(group) ? .removeFavorite : .addFavorite,
+                    for: languageManager
+                )
+            )
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(AppTheme.tacticalOrange.opacity(0.28), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.16), radius: 12, x: 0, y: 6)
     }
 }
 

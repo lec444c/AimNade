@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-20
-> 任务前基线提交：`6d56c1e`（`Finalize P0-2 handoff`，已推送至 `origin/main`）
-> 最近一次构建验证：主界面与导航 UI/UX 重构后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 任务前基线提交：`ffe928f`（`Refactor AimNade navigation around tactics`，已推送至 `origin/main`）
+> 最近一次构建验证：Mirage / Ancient / Nuke 三地图接入后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -16,18 +16,20 @@
 | Bundle Identifier | `com.example.AimNade` | `project.pbxproj`（**仍是模板默认值，未改成正式域名**，见 Known Issues） |
 | 显示名 | `AimNade` | `en.lproj` / `zh-Hans.lproj` 的 `CFBundleDisplayName` |
 | Deployment Target | iOS 17.0 | `IPHONEOS_DEPLOYMENT_TARGET` |
-| 阶段 | Mirage 单地图 MVP，功能闭环；**内容与资源缺口是当前唯一的主要短板** | 本文件第 2–4 节 |
+| 阶段 | 三地图本地 MVP；Mirage 有占位道具流程，Ancient / Nuke 暂为地图预览 | 本文件第 2–4 节 |
 
 ## Current Goal
 
-把 Mirage 单地图 MVP 从"功能可用"推进到"可交付"，**优先级已在 2026-09-16 修订**（真实教学截图允许继续使用占位图）：
+把本地三地图 MVP 从"功能可用"推进到"可交付"：
 
 1. **App Icon 与 Accent Color 已完成**（P0-1）。
 2. **V1 完整产品流程检查已完成**（P0-2）：中英文、浅色/深色、空状态/有数据状态及收藏持久化已走查；修复了教学图片全屏占位页在黑色背景上对比度不足的问题。
 3. **主界面/导航 UI/UX 重构已完成并通过用户审阅**：代码、文档、构建与代表性模拟器验证均已完成，已获准提交并推送。
-4. **当前最高优先级：专项 localization audit**（P0-3），修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
-5. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片（就绪前占位图可继续使用）。
-6. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
+4. **战术页视觉层级优化已完成并通过用户预览**。
+5. **Mirage / Ancient / Nuke 三地图接入已完成**：Mirage 保留完整道具界面，Ancient / Nuke 使用专属主题的地图预览态，不编造道具数据。
+6. **随后进行专项 localization audit**（P0-3），修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
+7. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片；未来再为 Ancient / Nuke 接入经核验的道具内容。
+8. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
 
 完整的优先级拆分见 `## Next`。
 
@@ -41,26 +43,27 @@
 - 工程、Target、Scheme、构建产物、源码目录和 `@main` 入口均统一命名为 `AimNade`。
 - Swift 5 + SwiftUI，iOS 17.0，设备族 `1,2`（iPhone + iPad）。
 - **零第三方依赖**（无 SPM / CocoaPods / Carthage），**无测试 target**。
-- `xcodebuild ... build` 实测 `BUILD SUCCEEDED`；构建产物 `AimNade.app` 内确认打包了 `lineups_mirage.json`、`Assets.car`、`en.lproj`、`zh-Hans.lproj`。
+- `xcodebuild ... build` 实测 `BUILD SUCCEEDED`；构建产物 `AimNade.app` 内确认打包了 `lineups_mirage.json`、`Assets.car`、`en.lproj`、`zh-Hans.lproj`，`assetutil` 确认 `mirage_map` / `ancient_map` / `nuke_map` 均已编译入包。
 - 全仓无 `TODO` / `FIXME` / `HACK` 遗留标记。
 
 ### 数据层与模型
 
 - `Models/LineupModels.swift`：`Map` → `LineupGroup` → `LineupVariant` 三级 `Codable` 模型。
 - `UtilityType`（`Smoke` / `Flash` / `Molotov` / `HE`）与 `LineupCategory`（`aSite` / `bSite` / `mid` / `tSide` / `ctSide`）枚举齐备，各自带本地化显示名与配色。
-- `Data/LineupStore.swift`（29 行）：从 Bundle 读 `lineups_mirage.json`，失败时回退到空 `Map`。
+- `Data/LineupStore.swift`（45 行）：从 Bundle 读 `lineups_mirage.json`，失败时回退到空 Mirage；同时登记 `lineupGroups` 为空的 Ancient / Nuke 地图预览。
 - `Data/lineups_mirage.json`（268 行）：已接入 Xcode Resources 构建阶段，确认被真实打包。
 - 数据自提交 `b4fb017`（`Load Mirage lineups from local JSON`，PR #35）由硬编码迁移为 JSON 驱动。
 - 当前数据自检通过：ID 唯一、坐标全部落在 `0…1`、枚举取值合法。
 
 ### 2D 战术地图
 
+- 顶部选择器可在 Mirage / Ancient / Nuke 之间切换；切换时重置地图/列表、搜索、道具类型、缩放、预览卡与开发者坐标状态，T / CT 保留为全局偏好。
+- Ancient 使用绿色主题，Nuke 使用深蓝主题；两者在无道具数据时隐藏无效的搜索和筛选器，显示可缩放的大图预览与明确的数据待补提示。
 - 单指平移 / 双指缩放（`UIScrollView`，通过 `ZoomableScrollView` 桥接，`minScale 1.0` / `maxScale 4.0`）+ 双击缩放（`doubleTapScale 2.5`，再双击复位）。
 - 按缩放级别自适应阈值的点位聚类（`92 / 76 / 52 / 36`），聚类内弹出 `ClusterLineupSheet` 选择具体道具组。
-- 区域过滤（推荐 / A 包点 / B 包点 / 中路 / T 方 / CT 方），默认落在 **"推荐"**（只显示 `isFeatured: true`）。
-- 道具类型过滤（全部 / 烟 / 闪 / 火 / 雷）。
-- 点击点位 → `navigationDestination` 进入道具组详情。
-- 空数据时地图上叠加 `EmptyStateView`。
+- 战术页统一提供 T / CT 与道具类型过滤（全部 / 烟 / 闪 / 火 / 雷），地图和列表共享状态；类型筛选显示当前阵营下的可用数量，零数据类型降权显示。
+- 点击点位先显示道具组预览卡，可直接收藏或继续进入详情；选中点位使用战术橙描边与强调阴影。
+- Mirage 筛选后无结果时，地图右上角显示轻量空状态标签；Ancient / Nuke 的 0 数据场景由专用地图预览提示承接，不遮挡地图内容。
 
 ### 开发者模式
 
@@ -73,24 +76,24 @@
 ### 列表、详情、搜索、收藏、设置、关于
 
 - 根导航：`TabView` 只保留战术 / 收藏 / 设置三个用户目标，每个 Tab 有独立 `NavigationStack`；启动默认直接进入战术页。
-- 战术页：`TacticsView` 统一管理当前地图、地图/列表模式、T/CT 阵营、道具类型和搜索词；顶部地图选择器当前只列出已有真实数据源的 Mirage。
+- 战术页：`TacticsView` 统一管理当前地图、地图/列表模式、T/CT 阵营、道具类型和搜索词；顶部地图选择器列出 Mirage / Ancient / Nuke，且只在当前地图有道具数据时显示完整筛选界面。
 - 道具列表：`TacticsListView` 和地图共享同一筛选状态，按 `LineupCategory` 分组，每行直接显示“起点 → 目标点”、方案名、类型、阵营和单方案收藏按钮。
 - 道具组详情：`LineupGroupDetailView` 概览信息 + 方案卡片列表 + 整组收藏。
 - 投掷方案详情：`LineupDetailView` 概览 / 位置 / 投掷步骤 / 教学图片折叠区 / 备注 + 单方案收藏。
 - 教学图片：折叠区 + 全屏分页预览（`TabView.page`）+ 图片缩放（`ZoomableImageView`）。**结构完整，但资源缺失 → 实际显示占位图。**
-- 搜索：不再是独立页面，改为战术顶部的原生 `.searchable`，实时同步过滤地图和列表。道具组匹配 ID / mapId / 目标名 / 类型 / 阵营 / 分类；方案匹配 ID / 名称 / 出生点·身位要求 / 起止区域 / 投掷方式 / 说明 / 难度，并保留大小写、变音符与去空格匹配。
-- 收藏：`FavoriteStore` 同时维护道具组与方案两组 ID 集合，`UserDefaults` 持久化；两个详情页都有星标按钮，`FavoritesView` 分区展示并复用详情页作为目标页。
+- 搜索：不再是独立页面，改为战术页内联搜索框，实时同步过滤地图和列表。道具组匹配 ID / mapId / 目标名 / 类型 / 阵营 / 分类；方案匹配 ID / 名称 / 出生点·身位要求 / 起止区域 / 投掷方式 / 说明 / 难度，并保留大小写、变音符与去空格匹配。
+- 收藏：`FavoriteStore` 同时维护道具组与方案两组 ID 集合，`UserDefaults` 持久化；`FavoritesView` 已改为从全部地图汇总收藏，当前实际内容仍只来自 Mirage。
 - 设置：`SettingsView` 语言选择（跟随系统 / 简体中文 / 英文）+ 开发者模式开关 + 关于页入口。
 - 关于：`AboutView` 作者头像（`creator_avatar`）、作者名、版本号、非官方声明、鸣谢。
 
 ### 本地化与 UI Design System
 
-- `LanguageManager` 三档语言（跟随系统 / 简体中文 / 英文），`UserDefaults` 持久化；`L10n`（`L10n.Key` 98 个 case，中英双语分支齐全）+ `LocalizedText`（JSON 业务内容双语）。
-- `Theme/AppTheme.swift`：颜色、圆角、间距的唯一来源。
+- `LanguageManager` 三档语言（跟随系统 / 简体中文 / 英文），`UserDefaults` 持久化；`L10n`（`L10n.Key` 100 个 case，中英双语分支齐全）+ `LocalizedText`（JSON 业务内容双语）。
+- `Theme/AppTheme.swift`：品牌蓝、战术橙、Ancient 绿、Nuke 深蓝、语义色、圆角和间距的唯一来源。
 - `AccentColor.colorset` 已配置通用 sRGB 品牌色 `#3A7AFE`；`AppTheme.accent` 继续使用 `Color.accentColor`。
 - `AppIcon.appiconset/AppIcon.png` 已接入用户提供的第一版图标：1024×1024、不含透明通道，保持原画面完整；使用通用外观，iPhone / iPad 图标资源已编译打包。
 - `Views/Components/`：`FeatureCard` / `MapMarkerView` / `UtilityBadge` 已抽出且在多个页面复用；`Views/EmptyStateView.swift` 统一空状态。
-- 复用核实：`MapMarkerView` 被 5 个文件引用，`UtilityBadge` 被 3 个，`EmptyStateView` 被 4 个，`AppTheme` 被 14 个。
+- 复用核实：`MapMarkerView` 被 5 个 Swift 文件引用，`UtilityBadge` 被 5 个，`EmptyStateView` 被 3 个，`AppTheme` 被 14 个。
 - 界面使用系统语义色，自带深色模式；关键按钮有 `accessibilityLabel`；`Views/` 下已无硬编码的固定 UI 文案（仅剩纯数字插值与已本地化的插值）。
 
 ### 文档维护
@@ -107,11 +110,11 @@
 
 ## In Progress
 
-- P0-3 localization audit 尚未开始；下一步只对齐 `docs/LOCALIZATION.md` 与实际 98 个 `L10n.Key`，不重构 App。
+- P0-3 localization audit 尚未开始；只对齐 `docs/LOCALIZATION.md` 与实际 100 个 `L10n.Key`，不重构 App。
 
 ### 工作区状态
 
-本轮 UI/UX 重构提交后，工作区应只保留以下任务前既有改动：
+本轮功能与文档由同一任务提交收口；任务结束时工作区仍保留任务前已有的工程元数据和本地文件：
 
 ```text
  M AimNade.xcodeproj/project.pbxproj
@@ -120,23 +123,23 @@
 ?? 图库/
 ```
 
-- `project.pbxproj` 的 3 个 Swift 文件重命名引用属于本轮提交；提交后保留的差异仅为任务前已有的 Xcode 27 升级元数据。Scheme 也只包含任务前已有的升级元数据差异。
+- `project.pbxproj` 与 Scheme 当前只包含任务前已有的 Xcode 27 升级元数据，本轮未修改它们。
 - `CODEX.md` 仍未被 git 跟踪。
 - `图库/` 是用户本地素材目录，未跟踪，本轮不纳入提交。
-- 本轮重构代码已构建、完成代表性模拟器验证并获用户批准收口。
 
 ### 尚未收敛的能力缺口
 
 - **18 张教学图片全部缺失**（详见 Known Issues）。**已确认不阻塞交付**：真实截图就绪前占位图可继续使用，已降级为 P1 内容填充任务。
 - **内容体量小且为占位数据**：3 个道具组 / 6 个投掷方案，全部 T 方 Smoke。
+- **Ancient / Nuke 尚无道具数据**：当前只提供用户提供的中文标注地图预览，不含道具组、投掷方案或教学截图。
 - **JSON 加载失败路径不可见**：当前静默回退空 `Map`。已确认不是最终设计，优化方向见 `## Next` P1 第 4 项与 Known Issues 第 6 条。
-- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 98，差 37 个）。已排为 P0-3，做一次专项 localization audit **修正文档**（不重构 App），见 `## Next` P0 第 3 项。
+- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 100，差 39 个）。已排为 P0-3，做一次专项 localization audit **修正文档**（不重构 App），见 `## Next` P0 第 3 项。
 - 无测试覆盖。
 
 ## Next
 
-> 范围纪律：**V1 只做 Mirage**。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
-> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1、P0-2 与主界面 UI/UX 重构已完成。当前继续 P0-3。
+> 范围纪律：V1 可浏览 Mirage / Ancient / Nuke 三张 2D 地图，但当前只有 Mirage 具备道具内容。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
+> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1、P0-2、主界面 UI/UX 重构、战术页视觉优化与三地图预览均已完成。当前继续 P0-3。
 > P0 的三项都属于"在当前实现上做检查或配置"，**不要因此新增大功能**。
 
 ### P0 — 交付前置与完整性确认
@@ -147,7 +150,7 @@
    - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
    - **已知可接受项**：教学图片显示占位图属预期行为，**不要把它记为新缺陷**（见第 10 项）。
    - 发现的问题按"明显问题"与"新功能需求"分类记录：明显问题可修，新功能需求只登记进本文件，不在本轮实现。
-3. **专项 localization audit**：`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记 61 个 key，实际 `L10n.Key` 有 98 个，**存在 37 个差异**。
+3. **专项 localization audit**：`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记 61 个 key，实际 `L10n.Key` 有 100 个，**存在 39 个差异**。
    - 目标：**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
    - audit 范围：比对 `L10n.Key` 与实际清单、确认中英文双语分支无遗漏、确认 `Views/` 下无硬编码文案、把 V1 范围约束补进规范文档。
    - **约束：不要为了补 key 而重构 App。** 只改文档；若发现代码侧真正不一致（例如某 key 只有英文没有中文），单独记录并按需最小修复，不做结构性改动。
@@ -183,17 +186,18 @@
 
 ### 条件性任务（等触发条件出现再做）
 
-15. **向战术页接入第二张真实地图数据**：顶部地图选择器和共享状态已就绪，但 V1 仍只做 Mirage。
-    - 触发条件：第二张地图的 JSON、2D 地图资源和已核验道具数据全部就绪。
-    - 届时把新 `Map` 加入 `LineupStore.maps`，验证地图/列表/搜索/筛选随地图切换；不需要把 `MapListView` 改成启动前置页。
+15. **为 Ancient / Nuke 接入真实道具数据**：地图资源、顶部选择器、独立主题和空数据预览态已就绪。
+    - 触发条件：对应地图的数据来源、核验方式和教学素材授权均已确认。
+    - 届时新增对应 JSON，保证 group / variant ID 使用地图前缀且全局唯一，再验证地图/列表/搜索/筛选/收藏随地图切换。
 
 ## V1 Scope
 
-**V1 只做 Mirage 这一张地图。**
+**V1 内置 Mirage、Ancient、Nuke 三张 2D 地图；道具学习内容当前仅位于 Mirage。**
 
 包含：
 
-- 2D 战术地图（点位、过滤、聚类、缩放、点击进详情）。
+- Mirage 2D 战术地图（点位、过滤、聚类、缩放、点击进详情）。
+- Ancient / Nuke 可缩放地图预览（当前 0 道具数据）。
 - 截图教学：每个投掷方案用「站位图 / 瞄点图 / 结果图」三张截图讲解。
 - 道具分类列表（按 A 包点 / B 包点 / 中路 / T 方 / CT 方分组）。
 - 中英文全文搜索。
@@ -210,7 +214,7 @@
 - ❌ 后端服务 / 云同步
 - ❌ 用户投稿 / UGC
 
-> 说明：`UtilityType` 已含 Flash / Molotov / HE，`LineupCategory` 已含 B 包点 / CT 方，`MapListView` 已实现，`CODEX.md` 的 v1.5 / v2.0 路线图也提到更多地图与社区功能——**这些都属于枚举预留、页面预留或未来版本规划，不是 V1 范围**。不要因为它们"已经在代码里"就当成待完成的 V1 任务。
+> 说明：`UtilityType` 已含 Flash / Molotov / HE，`LineupCategory` 已含 B 包点 / CT 方；这些枚举预留不代表对应内容已存在。Ancient / Nuke 已能预览也不代表已有真实道具教学。
 
 ## Important Architecture
 
@@ -221,8 +225,8 @@
 - `AimNade/AimNadeApp.swift` 是 `@main` 入口。
 - 注入三个全局 `ObservableObject`：`LanguageManager`、`DeveloperSettings`、`FavoriteStore`。
 - 根导航：`TabView` 包含战术 / 收藏 / 设置，每个 Tab 内是独立 `NavigationStack`；战术为默认 Tab。
-- `TacticsView` 是主界面，顶部 `Menu` 选择当前地图，`.searchable` 实时过滤，`Picker(.segmented)` 在地图/列表与 T/CT 之间切换，道具类型使用横向 compact chips。
-- `Views/MapListView.swift` 仍未接入启动流程。V1 只有 Mirage，多地图扩展应继续使用战术页的顶部选择器，不需要恢复启动前置列表。
+- `TacticsView` 是主界面，顶部 `Menu` 选择 Mirage / Ancient / Nuke。有道具数据时显示搜索、地图/列表、T/CT 与道具类型筛选；空数据地图则进入简化预览态。
+- `Views/MapListView.swift` 仍未接入启动流程。三张地图继续使用战术页的顶部选择器，不需要恢复启动前置列表。
 
 ### 数据模型
 
@@ -234,26 +238,26 @@
 
 ### 数据流
 
-`lineups_mirage.json`（Bundle 资源）→ `LineupStore.mirageMap`（`static let`，进程内只读一次）→ 各页面通过参数接收 `Map` → 搜索/过滤/聚类都在内存中对 `map.lineupGroups` 做计算。
+`LineupStore.maps` 提供三张 `Map` → `TacticsView` 管理当前地图与状态。Mirage 的内容链路为 `lineups_mirage.json`（Bundle 资源）→ `LineupStore.mirageMap`（`static let`，进程内只读一次）→ 内存中搜索/过滤/聚类。Ancient / Nuke 是代码定义的空 `Map`，只引用 Asset Catalog 地图图片。
 
-### 文件清单（23 个 Swift 文件，3455 行）
+### 文件清单（23 个 Swift 文件，3926 行）
 
 | 目录 | 文件 |
 |---|---|
-| 根 | `AimNadeApp.swift` |
-| `Models/` | `LineupModels.swift`(140) / `FavoriteStore.swift`(68) / `DeveloperSettings.swift`(15) |
-| `Data/` | `LineupStore.swift`(29) / `lineups_mirage.json`(268) |
-| `Localization/` | `L10n.swift`(500) / `LanguageManager.swift`(39) / `LocalizedText.swift`(15) |
-| `Theme/` | `AppTheme.swift`(19) |
-| `Views/` | `TacticalMapView.swift`(944) / `LineupDetailView.swift`(436) / `TacticsView.swift`(230) / `LineupGroupDetailView.swift`(159) / `FavoritesView.swift`(142) / `AboutView.swift`(138) / `TacticsListView.swift`(115) / `LineupSearch.swift`(103，搜索匹配器) / `SettingsView.swift`(49) / `MapListView.swift`(45) / `EmptyStateView.swift`(44) |
-| `Views/Components/` | `MapMarkerView.swift`(68) / `UtilityBadge.swift`(56) / `FeatureCard.swift`(39) |
+| 根 | `AimNadeApp.swift`(47) |
+| `Models/` | `LineupModels.swift`(153) / `FavoriteStore.swift`(68) / `DeveloperSettings.swift`(15) |
+| `Data/` | `LineupStore.swift`(45) / `lineups_mirage.json`(268) |
+| `Localization/` | `L10n.swift`(525) / `LanguageManager.swift`(39) / `LocalizedText.swift`(15) |
+| `Theme/` | `AppTheme.swift`(24) |
+| `Views/` | `TacticalMapView.swift`(1105) / `LineupDetailView.swift`(436) / `TacticsView.swift`(460) / `LineupGroupDetailView.swift`(159) / `FavoritesView.swift`(142) / `TacticsListView.swift`(141) / `AboutView.swift`(138) / `LineupSearch.swift`(103，搜索匹配器) / `SettingsView.swift`(49) / `MapListView.swift`(45) / `EmptyStateView.swift`(44) |
+| `Views/Components/` | `MapMarkerView.swift`(78) / `UtilityBadge.swift`(56) / `FeatureCard.swift`(39) |
 | 本地化资源 | `en.lproj/InfoPlist.strings` / `zh-Hans.lproj/InfoPlist.strings`（均只含 `CFBundleDisplayName`） |
 
 ## Important Rules
 
 长期约束的完整版本在 **`AGENTS.md`**，这里只列最容易被违反的几条：
 
-1. **V1 只做 Mirage**；不做 3D、不做视频、不做登录、不做后端、不做用户投稿。
+1. **V1 可浏览 Mirage / Ancient / Nuke，但当前只有 Mirage 具备道具内容**；不做 3D、不做视频、不做登录、不做后端、不做用户投稿。
 2. **所有新增 UI 文案必须走现有本地化系统**（`L10n.Key` + 英文 + 简体中文三处同步），禁止硬编码。
 3. **图片资源名、代码变量名、数据 ID 使用英文。**
 4. **不编造真实 CS 道具数据**；当前允许使用明确标记的占位数据。
@@ -274,27 +278,27 @@
 ### 🟠 数据与内容
 
 3. **18 张教学图片资源 100% 缺失。** JSON 中每个 variant 声明 3 张图（`positionImageName` / `aimImageName` / `resultImageName`），3 组 × 2 方案 × 3 张 = 18 个资源名，**在 `Assets.xcassets` 中一个都不存在**。界面因此显示 `PreviewPlaceholderView` 占位。
-   现有 imageset 只有 2 个：`mirage_map`、`creator_avatar`。
+   现有普通 imageset 共 4 个：`mirage_map`、`ancient_map`、`nuke_map`、`creator_avatar`。
    - **严重度已下调（2026-09-16）**：真实教学截图允许继续使用占位图，**此项不阻塞交付**，属 P1 内容填充任务（`## Next` P1-10）。
 4. **当前 Mirage 内容是占位/示例数据**，不得描述为"已核实的真实道具数据"：数值坐标为手工挑选、教学图片不存在、内容未与真实游戏对拍、JSON 中没有任何来源或可信度标记字段。
-5. 内容覆盖极小：仅 **3 个道具组 / 6 个投掷方案，全部为 T 方 Smoke**。Flash / Molotov / HE 三类道具与 B 包点、CT 方两个分类在代码中已支持但数据为空。
+5. 内容覆盖极小：Mirage 仅 **3 个道具组 / 6 个投掷方案，全部为 T 方 Smoke**；Ancient / Nuke 为 **0 道具数据**。Flash / Molotov / HE 三类道具与 B 包点、CT 方两个分类在代码中已支持但数据为空。
 6. **JSON 加载失败是"静默失败"（已确认不是最终设计）。** `LineupStore` 在 JSON 缺失或解码失败时回退到空 `Map`，`catch` 块为空——用户只看到空列表，没有任何错误提示。
    - 保留 fallback 以防止 App crash 没有问题；**要改的是"静默"**。
    - 后续优化方向：**Debug 环境**输出明确的 JSON decode / load 错误；**Release / UI 层**显示合理的 empty state；不通过静默 fallback 长期掩盖数据错误。
-   - 详见 `## Next` P1 第 4 项。测试资源目录 `Data/` 下只有 `lineups_mirage.json`（V1 只支持 Mirage 是刻意设计）。
+   - 详见 `## Next` P1 第 4 项。资源目录 `Data/` 下只有 `lineups_mirage.json`，因此此加载路径只影响 Mirage 道具内容。
 7. 无 JSON 校验、无 ID 唯一性检查、无坐标范围检查、无图片资源存在性检查。
 
 ### 🟡 代码债
 
-8. `Views/TacticalMapView.swift` 仍有 **944 行**、13 个内部类型，但顶层筛选与导航已移到 `TacticsView`；地图文件仍同时包含渲染 / 聚类 / 坐标换算 / 缩放容器 / 开发者工具，后续仍可分段拆分。
-9. `Views/MapListView.swift` 已实现但未接入根导航。**这是刻意设计**——战术页顶部地图选择器已预留多地图 Context，V1 只有 Mirage 时不需要启动前置列表。
+8. `Views/TacticalMapView.swift` 仍有 **1105 行**、13 个内部类型，但顶层筛选与导航已移到 `TacticsView`；地图文件仍同时包含渲染 / 聚类 / 坐标换算 / 缩放容器 / 点位预览 / 开发者工具，后续仍可分段拆分。
+9. `Views/MapListView.swift` 已实现但未接入根导航。**这是刻意设计**——三张地图已由战术页顶部选择器统一切换，不需要启动前置列表。
 10. **无测试 target**：搜索、聚类、坐标换算、收藏持久化、JSON 解码全部没有自动化覆盖；构建通过是唯一可自动化的验证手段。
 11. 地图缩放上限 4.0（`ZoomableScrollView` 的 `maxScale`），在 iPad 或大尺寸屏幕上的清晰度**待确认**。
 12. `LineupModels.swift` 中定义了名为 `Map` 的结构体，与 Swift 标准库（以及部分框架）的 `Map` 同名，跨模块引用时**可能产生歧义**（当前可编译，属命名隐患）。
 
 ### 🔵 文档与工程
 
-13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 98 个，差 37 个；该文档也未提及 V1 范围硬约束。
+13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 100 个，差 39 个；该文档也未反映当前三地图范围。
     - 已排为 **P0-3**：目标是**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
     - **约束：不要为了补 key 而重构 App。** 详见 `## Next` P0 第 3 项。
 14. ✅ **README 已中文化并纳入同步维护**：文档描述当前实现与占位内容，`AGENTS.md` 文档索引已同步。详细进度仍只放在本文件；后续任务在 `Last Work` 记录 README 更新或无需更新的核对结论。
@@ -305,11 +309,38 @@
 ### ❓ 待确认
 
 17. **是否给数据模型增加占位标记字段**（如 `LineupVariant.isPlaceholder`）？当前 schema 没有该字段，而规则要求占位数据必须明确标记。涉及 `LineupModels.swift` + JSON 变更，需先确认。
-18. **真实 CS 道具数据的来源与授权**：图片和数据的版权归属直接决定 V1 能否安全发布，目前没有任何来源记录。
+18. **地图图片与真实 CS 道具数据的来源与授权**：Ancient / Nuke JPEG 由用户提供，但尚无公开发布授权记录；两张图的中文标注已烘焙进图片，英文界面也会显示中文。上架前必须确认图片与后续教学内容的来源、授权和核验方式。
 19. `CODEX.md` 是否纳入 git？它仍描述旧 Launcher 导航和旧文件名，本轮为保留既有未跟踪工作而未修改；纳管前应先与当前架构同步，并单独确认提交时机。
 20. `AboutView` 显示的版本号来自 `Bundle.main` 的 `CFBundleShortVersionString`（缺失时回退 `"1.0"`）；而 App 名称走的是 `L10n` 常量而非 Bundle。是否统一为只读 Bundle 元数据，待确认。
 
 ## Last Work
+
+### 2026-09-20 — Ancient / Nuke 地图接入与三地图主题
+
+- 将用户提供的 Ancient（1206×1327 JPEG）与 Nuke（1206×1356 JPEG）原图接入 `Assets.xcassets`，资源名为 `ancient_map` / `nuke_map`，未裁剪、未重绘。
+- `LineupStore.maps` 现包含 Mirage / Ancient / Nuke；Ancient / Nuke 使用空 `lineupGroups`，只提供真实地图图片预览，没有编造道具点位或投掷方案。
+- 战术页顶部地图选择器可直接切换三图；切换时重置地图视图、搜索、道具类型、缩放、点位预览和开发者编辑状态，避免跨地图残留。
+- 只有当前地图存在道具数据时才显示搜索、地图/列表、T/CT 与道具筛选；Ancient / Nuke 使用放大地图的专用预览态和双语数据待补提示。
+- 每张地图有独立视觉语言：Mirage 蓝/橙 + scope，Ancient 绿 + leaf，Nuke 深蓝 + atom；Nuke 交互蓝已调深以保证白字对比度。
+- 收藏页改为从 `LineupStore.maps` 汇总道具组和方案，为后续多地图内容保持兼容；当前收藏内容仍只来自 Mirage。
+- 新增双语 `mapPreviewOnly` / `mapDataPending`，`L10n.Key` 总数为 100；`docs/LOCALIZATION.md` 专项 audit 差异相应为 39 个。
+- 验证：`jq` 通过两个 imageset 清单；源图与入库图片 SHA-256 一致；Debug 构建通过；`assetutil` 确认三张地图已编译进 `Assets.car`；iPhone 17 / iOS 26.5 模拟器检查了三图浅色界面及 Ancient / Nuke 深色界面。
+- README 与 `AGENTS.md` 已同步三地图范围、数据边界、资源限制和授权风险；`project.pbxproj` / Scheme 的任务前差异、未跟踪 `CODEX.md` 与 `图库/` 仍原样保留。
+
+---
+
+### 2026-09-20 — 战术页视觉层级优化
+
+- 把战术页顶部改为地图上下文标题，直接显示当前 Mirage 的 3 个道具组和 6 个方案，并用品牌蓝到战术橙的轻量渐变建立视觉识别。
+- 将搜索、地图/列表、T/CT 与道具类型筛选压缩为更紧凑的原生控件；道具筛选增加数量，当前无数据的类型降低视觉权重但不虚构内容。
+- 地图容器按资源宽高比自适应，不再用多余留白填满剩余高度；保留缩放、双击、聚类和开发者坐标工具。
+- 地图标记从字母改为 SF Symbols 道具图形；点击单点先显示带类型、方案数量、收藏和详情入口的预览卡，选中点使用战术橙强调。
+- 列表继续复用真实 6 个方案，新增区域数量、难度徽章、卡片层级和更清晰的收藏按钮；没有新增或修改 JSON 数据。
+- 验证：iPhone 17 / iOS 26.5 Debug 构建通过（exit 0）；模拟器检查中文浅色默认地图、中文浅色点位选中卡、中文列表和深色地图。仓库外临时预览入口未写入项目。
+- README 已同步点位预览卡和筛选数量；`AGENTS.md` 已同步组件职责与当前文件规模。
+- 用户已确认视觉预览，本轮与随后三地图接入一并收口；任务前已有的 `project.pbxproj`、Scheme、`CODEX.md` 与 `图库/` 保持原状。
+
+---
 
 ### 2026-09-20 — 主界面与导航 UI/UX 重构
 
@@ -446,24 +477,26 @@
 
 ### 当前基线
 
-- 分支 `main`：UI/UX 重构已完成验证并获用户批准提交；任务前远程基线为 `6d56c1e`。
+- 分支 `main`：本轮任务前本地 `HEAD` 与 `origin/main` 同步在 `ffe928f` (`Refactor AimNade navigation around tactics`)；战术页视觉优化和三地图接入已由本轮任务提交并推送。
+- Mirage 保留 3 组 / 6 方案占位数据与完整交互；Ancient / Nuke 是 0 道具数据的地图预览态，使用用户提供的中文标注 JPEG。
 - 任务前已存在的 Xcode 27 升级元数据差异、未跟踪 `CODEX.md` 和用户本地 `图库/` 仍保留；不要把它们混入后续提交。
-- 本轮 Debug 构建通过（iPhone 17 + iOS 26.5 模拟器），中英文、深浅色、地图/列表、搜索、空状态、收藏和设置已做代表性验证。
-- README 已与新导航同步；下一步为 P0-3 localization audit。
+- Debug 构建通过（iPhone 17 + iOS 26.5 模拟器）；`assetutil` 确认三张地图入包；已检查三图浅色界面、Ancient / Nuke 深色界面、Mirage 点位选中卡和列表模式。
 
 ### 建议的下一个任务：P0-3 localization audit
 
-**为什么是它**：当前用户流程、主导航与交付资源配置已完成，规范文档仍比实际 `L10n.Key` 少 37 个条目。
+**为什么是它**：当前主流程、三地图预览与交付资源均已完成，规范文档仍比实际 `L10n.Key` 少 39 个条目。
 
 **执行边界**：
 
-- 对齐 `docs/LOCALIZATION.md` 与实际 98 个 `L10n.Key`（当前登记 61，差 37）。
+- 对齐 `docs/LOCALIZATION.md` 与实际 100 个 `L10n.Key`（当前登记 61，差 39）。
 - 确认英文和简体中文分支覆盖一致，并检查 `Views/` 下没有新增硬编码固定文案。
+- 把规范中的地图范围更新为 Mirage / Ancient / Nuke，同时保留"只有 Mirage 有道具数据"的真实边界。
 - 以文档修正为主；若发现真正的代码缺口，单独记录并最小修复，不做结构性重构。
 
 ### 内容填充任务（P1，不阻塞交付）
 
 - **录入真实 Mirage 道具数据**（取代当前占位/示例数据），并记录来源与核验方式。
+- **为 Ancient / Nuke 录入真实道具数据**，仅在数据来源、核验方式和素材授权确定后启动。
 - **补齐 18 张教学图片**：真实截图就绪前**占位图可以继续使用**。资源名清单见下（需要时再查）。
 
 | 道具组 | 变体 | 资源名前缀（后缀 `_position` / `_aim` / `_result`） |
@@ -486,7 +519,7 @@
 
 - 不要在"产品流程检查"里夹带新功能；新需求只登记，不在本轮实现。
 - 不要为了补 localization key 而重构 App 或改动界面结构。
-- 不要把 `MapListView` 恢复成启动前置页——V1 只有 Mirage；第二张地图就绪时扩展战术页已有的顶部地图选择器。
+- 不要把 `MapListView` 恢复成启动前置页——Mirage / Ancient / Nuke 已在战术页顶部统一切换。
 - 不要给开发者模式的坐标拖动加写回逻辑。
 - 不要通过静默 fallback 长期掩盖 JSON 数据错误。
 - 不要在没有明确理由时改动 `LineupModels.swift`、`project.pbxproj` 或 `lineups_mirage.json`。

@@ -29,7 +29,7 @@ private struct MainTabView: View {
             }
 
             NavigationStack {
-                FavoritesView(map: LineupStore.mirageMap)
+                FavoritesView(maps: LineupStore.maps)
             }
             .tabItem {
                 Label(L10n.text(.favorites, for: languageManager), systemImage: "star")

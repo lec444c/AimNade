@@ -7,6 +7,8 @@ enum L10n {
         case mapView
         case listView
         case mirage
+        case mapPreviewOnly
+        case mapDataPending
         case lineupCount(Int)
         case variantCount(Int)
         case settings
@@ -123,6 +125,10 @@ enum L10n {
             return "List"
         case .mirage:
             return "Mirage"
+        case .mapPreviewOnly:
+            return "Map Preview"
+        case .mapDataPending:
+            return "Lineup data will be added later."
         case .lineupCount(let count):
             return "\(count) utility lineups"
         case .variantCount(let count):
@@ -324,6 +330,10 @@ enum L10n {
             return "列表"
         case .mirage:
             return "Mirage"
+        case .mapPreviewOnly:
+            return "地图预览"
+        case .mapDataPending:
+            return "道具数据待后续添加。"
         case .lineupCount(let count):
             return "\(count) 个道具点位"
         case .variantCount(let count):

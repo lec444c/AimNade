@@ -4,14 +4,14 @@ struct FavoritesView: View {
     @EnvironmentObject private var languageManager: LanguageManager
     @EnvironmentObject private var favoriteStore: FavoriteStore
 
-    let map: Map
+    let maps: [Map]
 
     private var favoriteGroups: [LineupGroup] {
-        favoriteStore.favoriteGroups(in: map)
+        maps.flatMap { favoriteStore.favoriteGroups(in: $0) }
     }
 
     private var favoriteVariants: [FavoriteVariant] {
-        favoriteStore.favoriteVariants(in: map)
+        maps.flatMap { favoriteStore.favoriteVariants(in: $0) }
     }
 
     private var hasFavorites: Bool {
@@ -135,7 +135,7 @@ private extension View {
 
 #Preview {
     NavigationStack {
-        FavoritesView(map: LineupStore.mirageMap)
+        FavoritesView(maps: LineupStore.maps)
             .environmentObject(LanguageManager())
             .environmentObject(FavoriteStore())
     }

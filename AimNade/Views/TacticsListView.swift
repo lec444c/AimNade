@@ -25,10 +25,27 @@ struct TacticsListView: View {
                     let categoryItems = items.filter { $0.group.category == category }
 
                     if !categoryItems.isEmpty {
-                        Section(category.displayName(for: languageManager)) {
+                        Section {
                             ForEach(categoryItems) { item in
                                 TacticsLineupRow(item: item)
+                                    .listRowInsets(
+                                        EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16)
+                                    )
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
                             }
+                        } header: {
+                            HStack {
+                                Text(category.displayName(for: languageManager))
+                                    .font(.subheadline.weight(.bold))
+
+                                Spacer()
+
+                                Text("\(categoryItems.count)")
+                                    .font(.caption.weight(.bold).monospacedDigit())
+                                    .foregroundStyle(AppTheme.secondaryText)
+                            }
+                            .textCase(nil)
                         }
                     }
                 }
@@ -52,7 +69,7 @@ private struct TacticsLineupRow: View {
                 LineupDetailView(group: item.group, variant: item.variant)
             } label: {
                 HStack(spacing: 12) {
-                    MapMarkerView(type: item.group.type, markerSize: 30)
+                    MapMarkerView(type: item.group.type, markerSize: 32)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(routeTitle)
@@ -67,6 +84,9 @@ private struct TacticsLineupRow: View {
                         HStack(spacing: 6) {
                             UtilityBadge.utilityType(item.group.type, for: languageManager)
                             UtilityBadge.side(item.group.side)
+                            UtilityBadge.difficulty(
+                                item.variant.difficultyDisplayName(for: languageManager)
+                            )
                         }
                     }
                 }
@@ -92,7 +112,13 @@ private struct TacticsLineupRow: View {
                 )
             )
         }
-        .padding(.vertical, 4)
+        .padding(12)
+        .background(AppTheme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(AppTheme.subtleBorder, lineWidth: 1)
+        }
     }
 
     private var routeTitle: String {
