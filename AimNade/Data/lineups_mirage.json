@@ -233,6 +233,186 @@
           "resultImageName": "mirage_jungle_smoke_palace_result"
         }
       ]
+    },
+    {
+      "id": "mirage_flash_placeholder",
+      "mapId": "mirage",
+      "targetName": {
+        "en": "Flash Placeholder",
+        "zhHans": "闪光弹占位示例"
+      },
+      "type": "Flash",
+      "side": "T",
+      "category": "bSite",
+      "isFeatured": false,
+      "variants": [
+        {
+          "id": "mirage_flash_placeholder_preview",
+          "name": {
+            "en": "Placeholder Preview",
+            "zhHans": "占位预览"
+          },
+          "spawnRequirement": {
+            "en": "Placeholder content for interface preview.",
+            "zhHans": "用于界面预览的占位内容。"
+          },
+          "startArea": {
+            "en": "Placeholder Start",
+            "zhHans": "占位起点"
+          },
+          "targetArea": {
+            "en": "Placeholder Target",
+            "zhHans": "占位目标"
+          },
+          "throwMethod": {
+            "en": "Placeholder only. Add verified positioning, aim point, and throw method later.",
+            "zhHans": "仅作占位，后续补充经过核验的站位、瞄点和投掷方式。"
+          },
+          "description": {
+            "en": "Interface preview content that has not been verified in game.",
+            "zhHans": "尚未经过游戏内核验的界面预览内容。"
+          },
+          "difficulty": "Easy",
+          "positionImageName": "mirage_flash_placeholder_position",
+          "aimImageName": "mirage_flash_placeholder_aim",
+          "resultImageName": "mirage_flash_placeholder_result"
+        }
+      ]
+    },
+    {
+      "id": "mirage_molotov_placeholder",
+      "mapId": "mirage",
+      "targetName": {
+        "en": "Molotov Placeholder",
+        "zhHans": "燃烧弹占位示例"
+      },
+      "type": "Molotov",
+      "side": "T",
+      "category": "bSite",
+      "isFeatured": false,
+      "variants": [
+        {
+          "id": "mirage_molotov_placeholder_preview",
+          "name": {
+            "en": "Placeholder Preview",
+            "zhHans": "占位预览"
+          },
+          "spawnRequirement": {
+            "en": "Placeholder content for interface preview.",
+            "zhHans": "用于界面预览的占位内容。"
+          },
+          "startArea": {
+            "en": "Placeholder Start",
+            "zhHans": "占位起点"
+          },
+          "targetArea": {
+            "en": "Placeholder Target",
+            "zhHans": "占位目标"
+          },
+          "throwMethod": {
+            "en": "Placeholder only. Add verified positioning, aim point, and throw method later.",
+            "zhHans": "仅作占位，后续补充经过核验的站位、瞄点和投掷方式。"
+          },
+          "description": {
+            "en": "Interface preview content that has not been verified in game.",
+            "zhHans": "尚未经过游戏内核验的界面预览内容。"
+          },
+          "difficulty": "Easy",
+          "positionImageName": "mirage_molotov_placeholder_position",
+          "aimImageName": "mirage_molotov_placeholder_aim",
+          "resultImageName": "mirage_molotov_placeholder_result"
+        }
+      ]
+    },
+    {
+      "id": "mirage_he_placeholder",
+      "mapId": "mirage",
+      "targetName": {
+        "en": "HE Placeholder",
+        "zhHans": "手雷占位示例"
+      },
+      "type": "HE",
+      "side": "T",
+      "category": "mid",
+      "isFeatured": false,
+      "variants": [
+        {
+          "id": "mirage_he_placeholder_preview",
+          "name": {
+            "en": "Placeholder Preview",
+            "zhHans": "占位预览"
+          },
+          "spawnRequirement": {
+            "en": "Placeholder content for interface preview.",
+            "zhHans": "用于界面预览的占位内容。"
+          },
+          "startArea": {
+            "en": "Placeholder Start",
+            "zhHans": "占位起点"
+          },
+          "targetArea": {
+            "en": "Placeholder Target",
+            "zhHans": "占位目标"
+          },
+          "throwMethod": {
+            "en": "Placeholder only. Add verified positioning, aim point, and throw method later.",
+            "zhHans": "仅作占位，后续补充经过核验的站位、瞄点和投掷方式。"
+          },
+          "description": {
+            "en": "Interface preview content that has not been verified in game.",
+            "zhHans": "尚未经过游戏内核验的界面预览内容。"
+          },
+          "difficulty": "Easy",
+          "positionImageName": "mirage_he_placeholder_position",
+          "aimImageName": "mirage_he_placeholder_aim",
+          "resultImageName": "mirage_he_placeholder_result"
+        }
+      ]
+    },
+    {
+      "id": "mirage_ct_smoke_placeholder",
+      "mapId": "mirage",
+      "targetName": {
+        "en": "CT Smoke Placeholder",
+        "zhHans": "CT 烟雾弹占位示例"
+      },
+      "type": "Smoke",
+      "side": "CT",
+      "category": "ctSide",
+      "isFeatured": false,
+      "variants": [
+        {
+          "id": "mirage_ct_smoke_placeholder_preview",
+          "name": {
+            "en": "Placeholder Preview",
+            "zhHans": "占位预览"
+          },
+          "spawnRequirement": {
+            "en": "Placeholder content for interface preview.",
+            "zhHans": "用于界面预览的占位内容。"
+          },
+          "startArea": {
+            "en": "Placeholder Start",
+            "zhHans": "占位起点"
+          },
+          "targetArea": {
+            "en": "Placeholder Target",
+            "zhHans": "占位目标"
+          },
+          "throwMethod": {
+            "en": "Placeholder only. Add verified positioning, aim point, and throw method later.",
+            "zhHans": "仅作占位，后续补充经过核验的站位、瞄点和投掷方式。"
+          },
+          "description": {
+            "en": "Interface preview content that has not been verified in game.",
+            "zhHans": "尚未经过游戏内核验的界面预览内容。"
+          },
+          "difficulty": "Easy",
+          "positionImageName": "mirage_ct_smoke_placeholder_position",
+          "aimImageName": "mirage_ct_smoke_placeholder_aim",
+          "resultImageName": "mirage_ct_smoke_placeholder_result"
+        }
+      ]
     }
   ]
 }

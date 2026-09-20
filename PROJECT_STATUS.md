@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的进度快照，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-21
-> 本轮任务前基线：`d688cdb`（`Blend tactics header into system background`，已推送至 `origin/main`）
-> 最近一次验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器浅色/深色模式首页检查通过。
+> 本轮任务前基线：`84840af`（`Refine tactics home information hierarchy`，已推送至 `origin/main`）
+> 最近一次验证：JSON 结构与数据约束检查通过；Debug 构建通过；iPhone 17 / iOS 26.5 模拟器确认 T / CT 与四类道具筛选可见。
 
 ---
 
@@ -39,10 +39,11 @@
 ### 数据与内容
 
 - `Map → LineupGroup → LineupVariant` 三级 `Codable` 模型。
-- Mirage 从 `AimNade/Data/lineups_mirage.json` 加载 3 个道具组 / 6 个投掷方案；均为 T 方 Smoke 占位数据。
+- Mirage 从 `AimNade/Data/lineups_mirage.json` 加载 7 个道具组 / 10 个投掷方案，全部仍为未经实战核验的占位/示例数据。
+- 其中 4 个新增单方案组明确用于界面预览：T 方 Flash / Molotov / HE 与 CT 方 Smoke，使阵营和四类道具筛选均有数据入口。
 - 每个方案保留名称、身位要求、起始/目标区域、投掷方式、说明、难度和三张教学图资源名。
 - Ancient / Nuke 仅有用户提供的中文标注地图，`lineupGroups` 为空，未伪造战术内容。
-- JSON 的 ID 唯一、枚举取值可解码，40 个双语对象均含非空 `en` / `zhHans`。
+- JSON 的 ID 唯一、枚举取值可解码，68 个双语对象均含非空 `en` / `zhHans`。
 
 ### 主界面与导航
 
@@ -89,8 +90,8 @@
 1. **JSON 加载失败可观察化**：Debug 输出具体 load/decode 错误；UI 区分 Mirage 加载失败与 Ancient / Nuke 正常空数据预览；保留 fallback 防止崩溃。
 2. **占位内容显式标记**：确认是否为数据模型增加可选 `isPlaceholder` 字段，并在 UI 中传达内容可信度。
 3. **自动化验证**：建立测试 Target，优先覆盖 JSON 解码、搜索匹配、收藏持久化和数据 ID 唯一性。
-4. 录入已核验的 Mirage 道具数据，优先补足 B 包点、CT 方与 Flash / Molotov / HE 类别。
-5. 补齐 18 张教学图，记录来源、授权和游戏内核验方式。
+4. 用已核验的 Mirage 道具内容逐步替换界面预览占位组，优先完善 B 包点、CT 方与 Flash / Molotov / HE 类别。
+5. 补齐 30 张教学图，记录来源、授权和游戏内核验方式。
 6. 验证 iPad、横屏、Dynamic Type、VoiceOver 与真机手势。
 7. 在数据来源、核验方式与素材授权明确后，再为 Ancient / Nuke 增加道具内容。
 
@@ -137,7 +138,7 @@
 ### 文件规模
 
 - 22 个 Swift 文件，共 2814 行 Swift。
-- 关键文件：`TacticalMapView.swift` 169 行，`TacticsView.swift` 468 行，`LineupModels.swift` 135 行，`L10n.swift` 430 行，`lineups_mirage.json` 238 行。
+- 关键文件：`TacticalMapView.swift` 169 行，`TacticsView.swift` 468 行，`LineupModels.swift` 135 行，`L10n.swift` 430 行，`lineups_mirage.json` 418 行。
 
 ## Important Rules
 
@@ -150,8 +151,8 @@
 
 ## Known Issues
 
-1. Mirage 内容仍是未经实战核验的占位/示例数据：3 组 / 6 方案，全部为 T 方 Smoke。
-2. 18 张教学图资源全部缺失，详情页目前显示占位图。
+1. Mirage 内容仍是未经实战核验的占位/示例数据：7 组 / 10 方案；新增的 4 组只用于展示阵营与道具类型筛选。
+2. 30 张教学图资源全部缺失，详情页目前显示占位图。
 3. Ancient / Nuke 地图的中文标注已烘焙在 JPEG 中，切换英文时不会变化；发布前仍需确认授权。
 4. `LineupStore` 在 JSON 缺失或解码失败时会静默回退空 Mirage，当前缺少可观察的错误状态。
 5. Bundle Identifier 仍为 `com.example.AimNade`，正式发布前需更换。
@@ -159,6 +160,14 @@
 7. `CODEX.md` 仍是未跟踪的本地文件，其内容可能落后于当前导航与数据模型。
 
 ## Last Work
+
+### 2026-09-21 — 补齐首页筛选占位内容
+
+- 在 Mirage JSON 中新增 4 个明确标记的界面预览占位组：T 方 Flash / Molotov / HE 与 CT 方 Smoke，每组包含 1 个方案。
+- Mirage 当前共 7 个道具组 / 10 个方案；首页默认显示 T / CT 阵营选择，并在 T 方显示 Smoke / Flash / Molotov / HE 四类筛选。
+- 未改动数据模型、SwiftUI、本地化系统或 Xcode 工程；占位条目的中英文名称、身位要求、投掷方式与说明均明确传达其预览性质。
+- README 已同步数据数量、筛选覆盖范围与未核验状态。
+- 验证：JSON 可解析，全部 ID 唯一，枚举取值合法，68 个双语对象完整；Debug 构建通过；iPhone 17 / iOS 26.5 模拟器确认筛选与占位卡片可见。
 
 ### 2026-09-21 — 战术首页信息层级优化
 
