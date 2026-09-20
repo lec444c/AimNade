@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的进度快照，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-20
-> 本轮任务前基线：`8e131a1`（`Complete localization audit documentation`，已推送至 `origin/main`）
-> 最近一次验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器确认 Mirage 默认进入列表且内容正常解码。
+> 本轮任务前基线：`b19b494`（`Streamline tactics browsing and map reference`，已推送至 `origin/main`）
+> 最近一次验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器浅色/深色模式顶部渐变检查通过。
 
 ---
 
@@ -136,8 +136,8 @@
 
 ### 文件规模
 
-- 22 个 Swift 文件，共 2795 行 Swift。
-- 关键文件：`TacticalMapView.swift` 169 行，`TacticsView.swift` 452 行，`LineupModels.swift` 135 行，`L10n.swift` 430 行，`lineups_mirage.json` 238 行。
+- 22 个 Swift 文件，共 2797 行 Swift。
+- 关键文件：`TacticalMapView.swift` 169 行，`TacticsView.swift` 454 行，`LineupModels.swift` 135 行，`L10n.swift` 430 行，`lineups_mirage.json` 238 行。
 
 ## Important Rules
 
@@ -159,6 +159,13 @@
 7. `CODEX.md` 仍是未跟踪的本地文件，其内容可能落后于当前导航与数据模型。
 
 ## Last Work
+
+### 2026-09-20 — 战术页顶部渐变衔接
+
+- 战术页背景从系统动态背景色平滑过渡到当前地图主题色，并将背景层延伸进顶部安全区，消除状态栏与内容区之间的硬切边界。
+- 仅修改 `TacticsView.swift` 的背景渐变，未改动导航、数据、筛选、列表卡片或本地化。
+- 验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器分别检查了浅色与深色模式，顶部衔接连续。
+- README 已检查，本轮仅是视觉细节调整，无需更新功能或架构说明。
 
 ### 2026-09-20 — 列表优先与地图参考收敛
 

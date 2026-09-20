@@ -59,15 +59,17 @@ struct TacticsView: View {
     var body: some View {
         ZStack(alignment: .top) {
             LinearGradient(
-                colors: [
-                    mapStyle.accent.opacity(0.14),
-                    mapStyle.secondary.opacity(0.07),
-                    Color.clear
+                stops: [
+                    .init(color: AppTheme.background, location: 0),
+                    .init(color: mapStyle.accent.opacity(0.10), location: 0.42),
+                    .init(color: mapStyle.secondary.opacity(0.06), location: 0.70),
+                    .init(color: Color.clear, location: 1)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            .frame(height: 190)
+            .frame(height: 260)
+            .ignoresSafeArea(edges: .top)
             .allowsHitTesting(false)
 
             VStack(spacing: 0) {
