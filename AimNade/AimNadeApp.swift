@@ -3,14 +3,12 @@ import SwiftUI
 @main
 struct AimNadeApp: App {
     @StateObject private var languageManager = LanguageManager()
-    @StateObject private var developerSettings = DeveloperSettings()
     @StateObject private var favoriteStore = FavoriteStore()
 
     var body: some Scene {
         WindowGroup {
             MainTabView()
                 .environmentObject(languageManager)
-                .environmentObject(developerSettings)
                 .environmentObject(favoriteStore)
         }
     }

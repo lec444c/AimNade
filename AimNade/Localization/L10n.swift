@@ -51,18 +51,6 @@ enum L10n {
         case description
         case lineupSteps
         case notes
-        case tapUtilityHint
-        case developerMode
-        case developerMapHint
-        case liveCoordinates
-        case lastEditedCoordinate
-        case noEditedCoordinate
-        case copyCoordinates
-        case copyJSON
-        case coordinatesCopied
-        case jsonCopied
-        case startPoint
-        case targetPoint
         case about
         case appDisplayName
         case appName
@@ -74,16 +62,9 @@ enum L10n {
         case unofficialNoticeText
         case acknowledgements
         case acknowledgementsText
-        case mapFilterArea
-        case mapFilterUtilityType
-        case mapFilterFeatured
         case mapFilterAll
-        case clusteredUtilities
         case lineupVariants
         case spawnRequirement
-        case targetPoints
-        case variantStartPoints
-        case lineConnections
         case close
         case search
         case searchPrompt
@@ -213,30 +194,6 @@ enum L10n {
             return "Lineup Steps"
         case .notes:
             return "Notes"
-        case .tapUtilityHint:
-            return "Tap a utility point to view details."
-        case .developerMode:
-            return "Developer Mode"
-        case .developerMapHint:
-            return "Drag utility points to adjust map coordinates."
-        case .liveCoordinates:
-            return "Live Coordinates"
-        case .lastEditedCoordinate:
-            return "Last Edited"
-        case .noEditedCoordinate:
-            return "No edited coordinate yet."
-        case .copyCoordinates:
-            return "Copy Coordinates"
-        case .copyJSON:
-            return "Copy JSON"
-        case .coordinatesCopied:
-            return "Coordinates copied."
-        case .jsonCopied:
-            return "JSON copied."
-        case .startPoint:
-            return "Start"
-        case .targetPoint:
-            return "Target"
         case .about:
             return "About"
         case .appDisplayName:
@@ -244,7 +201,7 @@ enum L10n {
         case .appName:
             return "App Name"
         case .appIntro:
-            return "AimNade is a 2D tactical utility tool for Counter-Strike players. It helps players learn common lineups through map markers, categorized lists, start position images, aim point images, and result references."
+            return "AimNade is a 2D tactical utility tool for Counter-Strike players. It helps players learn common lineups through map references, categorized lists, start position images, aim point images, and result references."
         case .creator:
             return "Creator"
         case .creatorName:
@@ -259,26 +216,12 @@ enum L10n {
             return "Acknowledgements"
         case .acknowledgementsText:
             return "Thanks to the Counter-Strike community for lineup tutorials and tactical knowledge sharing."
-        case .mapFilterArea:
-            return "Area"
-        case .mapFilterUtilityType:
-            return "Utility Type"
-        case .mapFilterFeatured:
-            return "Recommended"
         case .mapFilterAll:
             return "All"
-        case .clusteredUtilities:
-            return "Utilities"
         case .lineupVariants:
             return "Lineup Options"
         case .spawnRequirement:
             return "Spawn / Body Position"
-        case .targetPoints:
-            return "Target Points"
-        case .variantStartPoints:
-            return "Variant Start Points"
-        case .lineConnections:
-            return "Line Connections"
         case .close:
             return "Close"
         case .search:
@@ -418,30 +361,6 @@ enum L10n {
             return "投掷步骤"
         case .notes:
             return "备注"
-        case .tapUtilityHint:
-            return "点击道具点查看详情。"
-        case .developerMode:
-            return "开发者模式"
-        case .developerMapHint:
-            return "拖动道具点调整地图坐标。"
-        case .liveCoordinates:
-            return "实时坐标"
-        case .lastEditedCoordinate:
-            return "最近调整"
-        case .noEditedCoordinate:
-            return "还没有调整点位。"
-        case .copyCoordinates:
-            return "复制坐标"
-        case .copyJSON:
-            return "复制 JSON"
-        case .coordinatesCopied:
-            return "坐标已复制。"
-        case .jsonCopied:
-            return "JSON 已复制。"
-        case .startPoint:
-            return "站位"
-        case .targetPoint:
-            return "目标"
         case .about:
             return "关于"
         case .appDisplayName:
@@ -449,7 +368,7 @@ enum L10n {
         case .appName:
             return "App 名称"
         case .appIntro:
-            return "AimNade 是一个面向 CS 玩家制作的 2D 战术道具工具。你可以通过地图点位、分类列表、站位图、瞄点图和落点效果快速学习常用道具。"
+            return "AimNade 是一个面向 CS 玩家制作的 2D 战术道具工具。你可以通过地图参考、分类列表、站位图、瞄点图和落点效果快速学习常用道具。"
         case .creator:
             return "制作者"
         case .creatorName:
@@ -464,26 +383,12 @@ enum L10n {
             return "鸣谢"
         case .acknowledgementsText:
             return "感谢所有 CS 玩家社区的道具教学与战术分享。"
-        case .mapFilterArea:
-            return "区域"
-        case .mapFilterUtilityType:
-            return "道具类型"
-        case .mapFilterFeatured:
-            return "推荐"
         case .mapFilterAll:
             return "全部"
-        case .clusteredUtilities:
-            return "道具"
         case .lineupVariants:
             return "道具丢法"
         case .spawnRequirement:
             return "适用出生点 / 身位"
-        case .targetPoints:
-            return "目标点"
-        case .variantStartPoints:
-            return "变体站位点"
-        case .lineConnections:
-            return "站位到目标连线"
         case .close:
             return "关闭"
         case .search:

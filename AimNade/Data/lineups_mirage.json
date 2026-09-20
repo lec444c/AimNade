@@ -16,8 +16,6 @@
       "type": "Smoke",
       "side": "T",
       "category": "mid",
-      "targetMapX": 0.46,
-      "targetMapY": 0.36,
       "isFeatured": true,
       "variants": [
         {
@@ -47,10 +45,6 @@
             "zhHans": "封中路窗口，方便拿中路控制。"
           },
           "difficulty": "Medium",
-          "startMapX": 0.46,
-          "startMapY": 0.31,
-          "targetMapX": 0.46,
-          "targetMapY": 0.36,
           "positionImageName": "mirage_window_smoke_position",
           "aimImageName": "mirage_window_smoke_aim",
           "resultImageName": "mirage_window_smoke_result"
@@ -82,10 +76,6 @@
             "zhHans": "更快封 VIP，方便中路前压。"
           },
           "difficulty": "Medium",
-          "startMapX": 0.43,
-          "startMapY": 0.30,
-          "targetMapX": 0.46,
-          "targetMapY": 0.36,
           "positionImageName": "mirage_window_smoke_left_spawn_position",
           "aimImageName": "mirage_window_smoke_left_spawn_aim",
           "resultImageName": "mirage_window_smoke_left_spawn_result"
@@ -102,8 +92,6 @@
       "type": "Smoke",
       "side": "T",
       "category": "aSite",
-      "targetMapX": 0.69,
-      "targetMapY": 0.50,
       "isFeatured": true,
       "variants": [
         {
@@ -133,10 +121,6 @@
             "zhHans": "封警家，帮助进攻 A 包点。"
           },
           "difficulty": "Easy",
-          "startMapX": 0.63,
-          "startMapY": 0.37,
-          "targetMapX": 0.69,
-          "targetMapY": 0.50,
           "positionImageName": "mirage_ct_smoke_position",
           "aimImageName": "mirage_ct_smoke_aim",
           "resultImageName": "mirage_ct_smoke_result"
@@ -168,10 +152,6 @@
             "zhHans": "A Ramp 进攻时用于封警家。"
           },
           "difficulty": "Medium",
-          "startMapX": 0.55,
-          "startMapY": 0.44,
-          "targetMapX": 0.69,
-          "targetMapY": 0.50,
           "positionImageName": "mirage_ct_smoke_a_ramp_position",
           "aimImageName": "mirage_ct_smoke_a_ramp_aim",
           "resultImageName": "mirage_ct_smoke_a_ramp_result"
@@ -188,8 +168,6 @@
       "type": "Smoke",
       "side": "T",
       "category": "aSite",
-      "targetMapX": 0.42,
-      "targetMapY": 0.62,
       "isFeatured": true,
       "variants": [
         {
@@ -219,10 +197,6 @@
             "zhHans": "封 Jungle，减少 A 包点交叉火力。"
           },
           "difficulty": "Medium",
-          "startMapX": 0.58,
-          "startMapY": 0.35,
-          "targetMapX": 0.42,
-          "targetMapY": 0.62,
           "positionImageName": "mirage_jungle_smoke_position",
           "aimImageName": "mirage_jungle_smoke_aim",
           "resultImageName": "mirage_jungle_smoke_result"
@@ -254,10 +228,6 @@
             "zhHans": "封 Jungle，配合 A 二楼或夹 A 进攻。"
           },
           "difficulty": "Medium",
-          "startMapX": 0.64,
-          "startMapY": 0.67,
-          "targetMapX": 0.42,
-          "targetMapY": 0.62,
           "positionImageName": "mirage_jungle_smoke_palace_position",
           "aimImageName": "mirage_jungle_smoke_palace_aim",
           "resultImageName": "mirage_jungle_smoke_palace_result"

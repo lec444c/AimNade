@@ -4,7 +4,7 @@ struct TacticsView: View {
     @EnvironmentObject private var languageManager: LanguageManager
 
     @State private var selectedMapID: String
-    @State private var selectedViewMode: TacticsViewMode = .map
+    @State private var selectedViewMode: TacticsViewMode = .list
     @State private var selectedSide: TacticsSide = .terrorist
     @State private var selectedUtilityType: UtilityType?
     @State private var searchText = ""
@@ -39,16 +39,6 @@ struct TacticsView: View {
     private var utilityCounts: [UtilityType: Int] {
         Dictionary(grouping: sideGroups, by: \.type)
             .mapValues(\.count)
-    }
-
-    private var filteredGroups: [LineupGroup] {
-        baseGroups.filter { group in
-            searchText.isEmpty
-                || LineupSearch.matches(group: group, query: searchText)
-                || group.variants.contains { variant in
-                    LineupSearch.matches(variant: variant, query: searchText)
-                }
-        }
     }
 
     private var filteredItems: [TacticsLineupItem] {
@@ -95,13 +85,13 @@ struct TacticsView: View {
 
                     TacticalMapView(
                         map: selectedMap,
-                        groups: filteredGroups,
-                        accentColor: mapStyle.accent,
-                        showsEmptyState: false
+                        accentColor: mapStyle.accent
                     )
                     .id(selectedMap.id)
                 } else {
-                    TacticsSearchField(text: $searchText)
+                    if selectedViewMode == .list {
+                        TacticsSearchField(text: $searchText)
+                    }
 
                     TacticsControlPanel(
                         selectedViewMode: $selectedViewMode,
@@ -116,7 +106,6 @@ struct TacticsView: View {
                     case .map:
                         TacticalMapView(
                             map: selectedMap,
-                            groups: filteredGroups,
                             accentColor: mapStyle.accent
                         )
                         .id(selectedMap.id)
@@ -129,7 +118,7 @@ struct TacticsView: View {
         .background(AppTheme.background)
         .toolbar(.hidden, for: .navigationBar)
         .onChange(of: selectedMapID) {
-            selectedViewMode = .map
+            selectedViewMode = selectedMap.lineupGroups.isEmpty ? .map : .list
             selectedUtilityType = nil
             searchText = ""
         }
@@ -310,35 +299,39 @@ private struct TacticsControlPanel: View {
                 }
                 .pickerStyle(.segmented)
 
-                Picker(
-                    L10n.text(.side, for: languageManager),
-                    selection: $selectedSide
-                ) {
-                    ForEach(TacticsSide.allCases) { side in
-                        Text(side.shortTitle)
-                            .tag(side)
+                if selectedViewMode == .list {
+                    Picker(
+                        L10n.text(.side, for: languageManager),
+                        selection: $selectedSide
+                    ) {
+                        ForEach(TacticsSide.allCases) { side in
+                            Text(side.shortTitle)
+                                .tag(side)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 150)
                 }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 150)
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(utilityFilters, id: \.self) { utilityType in
-                        let count = utilityType.map { utilityCounts[$0, default: 0] }
-                            ?? allUtilityCount
+            if selectedViewMode == .list {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(utilityFilters, id: \.self) { utilityType in
+                            let count = utilityType.map { utilityCounts[$0, default: 0] }
+                                ?? allUtilityCount
 
-                        TacticsFilterChip(
-                            title: utilityType?.displayName(for: languageManager)
-                                ?? L10n.text(.mapFilterAll, for: languageManager),
-                            count: count,
-                            color: utilityType?.color ?? selectionColor,
-                            selectionColor: selectionColor,
-                            isSelected: selectedUtilityType == utilityType,
-                            isAvailable: utilityType == nil || count > 0
-                        ) {
-                            selectedUtilityType = utilityType
+                            TacticsFilterChip(
+                                title: utilityType?.displayName(for: languageManager)
+                                    ?? L10n.text(.mapFilterAll, for: languageManager),
+                                count: count,
+                                color: utilityType?.color ?? selectionColor,
+                                selectionColor: selectionColor,
+                                isSelected: selectedUtilityType == utilityType,
+                                isAvailable: utilityType == nil || count > 0
+                            ) {
+                                selectedUtilityType = utilityType
+                            }
                         }
                     }
                 }
@@ -454,7 +447,6 @@ private enum TacticsSide: String, CaseIterable, Hashable, Identifiable {
     NavigationStack {
         TacticsView(maps: LineupStore.maps)
             .environmentObject(LanguageManager())
-            .environmentObject(DeveloperSettings())
             .environmentObject(FavoriteStore())
     }
 }

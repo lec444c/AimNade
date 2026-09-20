@@ -15,14 +15,8 @@ struct LineupGroup: Identifiable, Hashable, Codable {
     let type: UtilityType
     let side: String
     let category: LineupCategory
-    let targetMapX: Double
-    let targetMapY: Double
     let isFeatured: Bool
     let variants: [LineupVariant]
-
-    var targetCoordinate: CGPoint {
-        CGPoint(x: targetMapX, y: targetMapY)
-    }
 }
 
 struct LineupVariant: Identifiable, Hashable, Codable {
@@ -34,21 +28,9 @@ struct LineupVariant: Identifiable, Hashable, Codable {
     let throwMethod: LocalizedText
     let description: LocalizedText
     let difficulty: String
-    let startMapX: Double
-    let startMapY: Double
-    let targetMapX: Double
-    let targetMapY: Double
     let positionImageName: String
     let aimImageName: String
     let resultImageName: String
-
-    var startCoordinate: CGPoint {
-        CGPoint(x: startMapX, y: startMapY)
-    }
-
-    var targetCoordinate: CGPoint {
-        CGPoint(x: targetMapX, y: targetMapY)
-    }
 
     func difficultyDisplayName(for languageManager: LanguageManager) -> String {
         switch difficulty {
