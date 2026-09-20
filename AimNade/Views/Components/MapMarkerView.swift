@@ -17,13 +17,12 @@ struct MapMarkerView: View {
             .font(.system(size: markerSize * 0.42, weight: .bold))
             .foregroundStyle(type == .flash ? .black : .white)
             .frame(width: markerSize, height: markerSize)
-            .background(type.color)
-            .clipShape(Circle())
+            .background(type.color.gradient)
+            .clipShape(RoundedRectangle(cornerRadius: markerSize * 0.32, style: .continuous))
             .overlay {
-                Circle()
-                    .stroke(.white, lineWidth: 2)
+                RoundedRectangle(cornerRadius: markerSize * 0.32, style: .continuous)
+                    .stroke(.white.opacity(0.30), lineWidth: 1)
             }
-            .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 1)
             .frame(width: 44, height: 44)
             .contentShape(Rectangle())
     }

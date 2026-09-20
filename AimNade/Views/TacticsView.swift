@@ -30,6 +30,14 @@ struct TacticsView: View {
         }
     }
 
+    private var availableSides: [TacticsSide] {
+        TacticsSide.allCases.filter { side in
+            selectedMap.lineupGroups.contains { group in
+                group.side.caseInsensitiveCompare(side.rawValue) == .orderedSame
+            }
+        }
+    }
+
     private var baseGroups: [LineupGroup] {
         sideGroups.filter { group in
             selectedUtilityType == nil || group.type == selectedUtilityType
@@ -99,6 +107,7 @@ struct TacticsView: View {
                         selectedViewMode: $selectedViewMode,
                         selectedSide: $selectedSide,
                         selectedUtilityType: $selectedUtilityType,
+                        availableSides: availableSides,
                         allUtilityCount: sideGroups.count,
                         utilityCounts: utilityCounts,
                         selectionColor: mapStyle.accent
@@ -121,8 +130,14 @@ struct TacticsView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onChange(of: selectedMapID) {
             selectedViewMode = selectedMap.lineupGroups.isEmpty ? .map : .list
+            selectedSide = availableSides.first ?? .terrorist
             selectedUtilityType = nil
             searchText = ""
+        }
+        .onChange(of: selectedSide) {
+            if let selectedUtilityType, utilityCounts[selectedUtilityType, default: 0] == 0 {
+                self.selectedUtilityType = nil
+            }
         }
     }
 }
@@ -175,23 +190,23 @@ private struct MapContextHeader: View {
     let style: TacticsMapStyle
 
     var body: some View {
-        HStack(spacing: 12) {
-            Menu {
-                ForEach(maps) { map in
-                    Button {
-                        selectedMapID = map.id
-                    } label: {
-                        if map.id == selectedMap.id {
-                            Label(map.name.value(for: languageManager), systemImage: "checkmark")
-                        } else {
-                            Label(
-                                map.name.value(for: languageManager),
-                                systemImage: TacticsMapStyle.style(for: map.id).symbol
-                            )
-                        }
+        Menu {
+            ForEach(maps) { map in
+                Button {
+                    selectedMapID = map.id
+                } label: {
+                    if map.id == selectedMap.id {
+                        Label(map.name.value(for: languageManager), systemImage: "checkmark")
+                    } else {
+                        Label(
+                            map.name.value(for: languageManager),
+                            systemImage: TacticsMapStyle.style(for: map.id).symbol
+                        )
                     }
                 }
-            } label: {
+            }
+        } label: {
+            HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
                         Text(selectedMap.name.value(for: languageManager))
@@ -211,21 +226,23 @@ private struct MapContextHeader: View {
                     .font(.footnote.weight(.medium))
                     .foregroundStyle(AppTheme.secondaryText)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(
-                "\(L10n.text(.maps, for: languageManager)): \(selectedMap.name.value(for: languageManager))"
-            )
 
-            Image(systemName: style.symbol)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(style.secondary)
-                .frame(width: 42, height: 42)
-                .background(style.accent.opacity(0.12))
-                .clipShape(Circle())
-                .accessibilityHidden(true)
+                Spacer(minLength: 0)
+
+                Image(systemName: style.symbol)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(style.secondary)
+                    .frame(width: 42, height: 42)
+                    .background(style.accent.opacity(0.12))
+                    .clipShape(Circle())
+                    .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel(
+            "\(L10n.text(.maps, for: languageManager)): \(selectedMap.name.value(for: languageManager))"
+        )
         .padding(.horizontal, AppTheme.pagePadding)
         .padding(.top, 8)
         .padding(.bottom, 10)
@@ -279,12 +296,13 @@ private struct TacticsControlPanel: View {
     @Binding var selectedSide: TacticsSide
     @Binding var selectedUtilityType: UtilityType?
 
+    let availableSides: [TacticsSide]
     let allUtilityCount: Int
     let utilityCounts: [UtilityType: Int]
     let selectionColor: Color
 
-    private var utilityFilters: [UtilityType?] {
-        [nil] + UtilityType.allCases.map(Optional.some)
+    private var availableUtilityTypes: [UtilityType] {
+        UtilityType.allCases.filter { utilityCounts[$0, default: 0] > 0 }
     }
 
     var body: some View {
@@ -301,12 +319,12 @@ private struct TacticsControlPanel: View {
                 }
                 .pickerStyle(.segmented)
 
-                if selectedViewMode == .list {
+                if selectedViewMode == .list, availableSides.count > 1 {
                     Picker(
                         L10n.text(.side, for: languageManager),
                         selection: $selectedSide
                     ) {
-                        ForEach(TacticsSide.allCases) { side in
+                        ForEach(availableSides) { side in
                             Text(side.shortTitle)
                                 .tag(side)
                         }
@@ -316,10 +334,10 @@ private struct TacticsControlPanel: View {
                 }
             }
 
-            if selectedViewMode == .list {
+            if selectedViewMode == .list, availableUtilityTypes.count > 1 {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(utilityFilters, id: \.self) { utilityType in
+                        ForEach([nil] + availableUtilityTypes.map(Optional.some), id: \.self) { utilityType in
                             let count = utilityType.map { utilityCounts[$0, default: 0] }
                                 ?? allUtilityCount
 
@@ -329,8 +347,7 @@ private struct TacticsControlPanel: View {
                                 count: count,
                                 color: utilityType?.color ?? selectionColor,
                                 selectionColor: selectionColor,
-                                isSelected: selectedUtilityType == utilityType,
-                                isAvailable: utilityType == nil || count > 0
+                                isSelected: selectedUtilityType == utilityType
                             ) {
                                 selectedUtilityType = utilityType
                             }
@@ -351,7 +368,6 @@ private struct TacticsFilterChip: View {
     let color: Color
     let selectionColor: Color
     let isSelected: Bool
-    let isAvailable: Bool
     let action: () -> Void
 
     var body: some View {
@@ -386,8 +402,6 @@ private struct TacticsFilterChip: View {
             }
         }
         .buttonStyle(.plain)
-        .disabled(!isAvailable)
-        .opacity(isAvailable ? 1 : 0.42)
     }
 }
 

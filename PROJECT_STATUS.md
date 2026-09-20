@@ -1,9 +1,9 @@
 # AimNade Project Status
 
 > 本文件是 Codex 与 DSH 共用的进度快照，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
-> 最后更新：2026-09-20
-> 本轮任务前基线：`b19b494`（`Streamline tactics browsing and map reference`，已推送至 `origin/main`）
-> 最近一次验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器浅色/深色模式顶部渐变检查通过。
+> 最后更新：2026-09-21
+> 本轮任务前基线：`d688cdb`（`Blend tactics header into system background`，已推送至 `origin/main`）
+> 最近一次验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器浅色/深色模式首页检查通过。
 
 ---
 
@@ -24,7 +24,7 @@
 
 1. Mirage 默认从分类列表进入道具学习流程。
 2. Mirage / Ancient / Nuke 的 2D 地图保留平移、双指缩放和双击缩放，作为清晰的地图结构参考。
-3. 搜索、阵营/道具筛选、收藏、道具组详情、方案详情、本地化与深色模式继续正常工作。
+3. 搜索、收藏、道具组详情、方案详情、本地化与深色模式继续正常工作；阵营和道具类型筛选仅在存在多个实际选项时出现。
 4. 下一个交付优先级是让 Mirage JSON 加载失败可观察，保留防崩溃 fallback。
 
 ## Completed
@@ -47,15 +47,15 @@
 ### 主界面与导航
 
 - 根导航为战术 / 收藏 / 设置三个 Tab，每个 Tab 有独立 `NavigationStack`。
-- 战术页顶部可切换 Mirage / Ancient / Nuke，并显示当前地图的道具组与方案数量。
-- Mirage 默认进入列表；列表按区域分组，每行展示“起点 → 目标点”、方案名、类型、阵营、难度和收藏入口。
+- 战术页顶部整块地图上下文均可打开 Mirage / Ancient / Nuke 选择器，并显示当前地图的道具组与方案数量。
+- Mirage 默认进入列表；列表按区域分组，每行展示“起点 → 目标点”、身位要求、类型、阵营、难度和收藏入口。
 - Mirage 可手动切换到地图视图；Ancient / Nuke 因暂无道具数据，直接显示专属主题的地图预览。
 - 地图可平移、双指缩放和双击缩放，`TacticalMapView` 仅负责图片呈现与缩放。
 
 ### 搜索、筛选、详情与收藏
 
 - 战术页内联搜索可匹配道具组与方案的 ID、名称、区域、投掷方式、说明与难度等字段。
-- T / CT 与道具类型筛选展示可用数量；零数据类型降权且不可选。
+- T / CT 与道具类型筛选根据当前数据自适应：只有存在多个可选值时才显示，并展示可用数量。
 - 道具组详情、投掷方案详情、投掷步骤、教学图折叠区、全屏分页与图片缩放已实现。
 - `FavoriteStore` 管理道具组和单个方案的收藏 ID，使用 `UserDefaults` 持久化。
 
@@ -75,7 +75,7 @@
 任务前已存在且本轮不应混入提交的内容：
 
 ```text
- M AimNade.xcodeproj/project.pbxproj   # 包含 Xcode 27 自动升级噪声；本轮只提交失效源文件引用的小块
+ M AimNade.xcodeproj/project.pbxproj   # Xcode 27 自动升级噪声
  M AimNade.xcodeproj/xcshareddata/xcschemes/AimNade.xcscheme
 ?? CODEX.md
 ?? 图库/
@@ -136,8 +136,8 @@
 
 ### 文件规模
 
-- 22 个 Swift 文件，共 2797 行 Swift。
-- 关键文件：`TacticalMapView.swift` 169 行，`TacticsView.swift` 454 行，`LineupModels.swift` 135 行，`L10n.swift` 430 行，`lineups_mirage.json` 238 行。
+- 22 个 Swift 文件，共 2814 行 Swift。
+- 关键文件：`TacticalMapView.swift` 169 行，`TacticsView.swift` 468 行，`LineupModels.swift` 135 行，`L10n.swift` 430 行，`lineups_mirage.json` 238 行。
 
 ## Important Rules
 
@@ -159,6 +159,15 @@
 7. `CODEX.md` 仍是未跟踪的本地文件，其内容可能落后于当前导航与数据模型。
 
 ## Last Work
+
+### 2026-09-21 — 战术首页信息层级优化
+
+- 地图标题、统计信息与右侧主题图标组成完整的地图选择入口，扩大可点击范围并保持原生 `Menu` 交互。
+- 阵营与道具类型控件由当前地图数据驱动，仅在存在多个实际选择时出现；当前单一 T 方烟雾弹占位内容保留搜索与地图/列表切换，首页更专注于可用内容。
+- 列表分区数量改为紧邻标题的胶囊标记；投掷卡副标题显示身位要求，减少重复信息并提高浏览价值。
+- 道具类型图标改为轻量圆角方形色块，在列表与详情之间保持统一。
+- README 已同步按内容呈现筛选控件的实际行为。
+- 验证：Debug 构建通过；iPhone 17 / iOS 26.5 模拟器分别检查浅色与深色首页。
 
 ### 2026-09-20 — 战术页顶部渐变衔接
 

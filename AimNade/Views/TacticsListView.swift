@@ -35,15 +35,19 @@ struct TacticsListView: View {
                                     .listRowBackground(Color.clear)
                             }
                         } header: {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Text(category.displayName(for: languageManager))
                                     .font(.subheadline.weight(.bold))
 
-                                Spacer()
-
                                 Text("\(categoryItems.count)")
-                                    .font(.caption.weight(.bold).monospacedDigit())
+                                    .font(.caption2.weight(.bold).monospacedDigit())
                                     .foregroundStyle(AppTheme.secondaryText)
+                                    .padding(.horizontal, 7)
+                                    .padding(.vertical, 3)
+                                    .background(AppTheme.primaryText.opacity(0.06))
+                                    .clipShape(Capsule())
+
+                                Spacer()
                             }
                             .textCase(nil)
                         }
@@ -76,7 +80,7 @@ private struct TacticsLineupRow: View {
                             .font(.headline)
                             .lineLimit(1)
 
-                        Text(item.variant.name.value(for: languageManager))
+                        Text(item.variant.spawnRequirement.value(for: languageManager))
                             .font(.subheadline)
                             .foregroundStyle(AppTheme.secondaryText)
                             .lineLimit(1)
