@@ -1,86 +1,125 @@
 # AimNade 本地化开发规范
 
-## 支持语言
+> 审计基线：2026-09-20。当前 `L10n.Key` 共 100 个，英文与简体中文分支均为 100/100 覆盖。
 
-AimNade 支持 English 和简体中文。用户选择语言由 `LanguageManager` 管理，页面显示文本统一通过 `L10n.text(_:for:)` 读取。
+## 支持语言与语言选择
 
-## UI 文本规则
+AimNade 支持 English 和简体中文，并提供“跟随系统”选项。
 
-- SwiftUI 页面里的固定 UI 文字必须使用 `L10n.Key`，不能直接写死中文或英文。
-- 页面标题、按钮、列表入口、Section 标题、占位文案、分类名称、道具类型显示都属于 UI 文本。
-- 新增页面时，先在 `L10n.Key` 添加 key，再在 English 和简体中文分支补齐文案，最后在 View 中调用 `L10n.text`。
-- 如果一个文案只有英文显示，例如地图名 `Mirage`，也要保留为本地化 key，英文和中文都返回 `Mirage`。
+- `LanguageManager` 使用 `UserDefaults` 保存 `system` / `zhHans` / `en` 三档选择。
+- 跟随系统时，首选语言以 `zh` 开头则使用简体中文，其余语言回退到英文。
+- 固定 UI 文案统一通过 `L10n.text(_:for:)` 读取。
+- JSON 业务内容通过 `LocalizedText { en, zhHans }` 读取。
+- App 显示名由 `en.lproj/InfoPlist.strings` 与 `zh-Hans.lproj/InfoPlist.strings` 管理，当前两处均为 `AimNade`。
 
-## 不放入 UI 本地化 key 的内容
+## 文案职责边界
 
-- 道具教程内容从数据读取，例如 `UtilityLineup.name`、`description`、`throwMethod`。
-- 图片资源名继续使用英文，例如 `mirage_window_smoke_position`。
-- 代码变量名、数据 id、枚举 case 不汉化。
+### 必须使用 `L10n.Key`
 
-## 当前核心 key
+- 页面与 Section 标题。
+- 按钮、菜单、筛选器、搜索框、空状态与提示文案。
+- 分类、道具类型、难度等固定枚举显示名。
+- VoiceOver 等用户可见的辅助功能文案。
 
-- `maps`: 地图 / Maps
-- `mirage`: Mirage / Mirage
-- `tacticalMap2D`: 2D 战术地图 / 2D Tactical Map
-- `utilityList`: 道具列表 / Utility List
-- `categoryASite`: A 包点 / A Site
-- `categoryBSite`: B 包点 / B Site
-- `categoryMid`: 中路 / Mid
-- `categoryTSide`: T 方 / T Side
-- `categoryCTSide`: CT 方 / CT Side
-- `smoke`: 烟 / Smoke
-- `flash`: 闪 / Flash
-- `molotov`: 火 / Molotov
-- `he`: 雷 / HE
-- `teachingImages`: 教学图片 / Teaching Images
-- `startPosition`: 站位图 / Start Position
-- `aimPoint`: 瞄点图 / Aim Point
-- `result`: 落点效果 / Result
-- `overview`: 概览 / Overview
-- `name`: 名称 / Name
-- `type`: 类型 / Type
-- `side`: 阵营 / Side
-- `category`: 分类 / Category
-- `difficulty`: 难度 / Difficulty
-- `position`: 位置 / Position
-- `startArea`: 起始位置 / Start Area
-- `targetArea`: 目标位置 / Target Area
-- `throwMethod`: 投掷方式 / Throw Method
-- `description`: 说明 / Description
-- `developerMode`: 开发者模式 / Developer Mode
-- `developerMapHint`: 拖动道具点调整地图坐标。 / Drag utility points to adjust map coordinates.
-- `liveCoordinates`: 实时坐标 / Live Coordinates
-- `lastEditedCoordinate`: 最近调整 / Last Edited
-- `noEditedCoordinate`: 还没有调整点位。 / No edited coordinate yet.
-- `copyCoordinates`: 复制坐标 / Copy Coordinates
-- `copyJSON`: 复制 JSON / Copy JSON
-- `coordinatesCopied`: 坐标已复制。 / Coordinates copied.
-- `jsonCopied`: JSON 已复制。 / JSON copied.
-- `startPoint`: 站位 / Start
-- `targetPoint`: 目标 / Target
-- `about`: 关于 / About
-- `appDisplayName`: AimNade / AimNade
-- `appName`: App 名称 / App Name
-- `appIntro`: App 简介文案
-- `creator`: 制作者 / Creator
-- `creatorName`: 乐扣 / b1skelA
-- `version`: 版本号 / Version
-- `unofficialNotice`: 非官方声明 / Unofficial Notice
-- `unofficialNoticeText`: 非官方声明文案
-- `acknowledgements`: 鸣谢 / Acknowledgements
-- `acknowledgementsText`: 鸣谢文案
-- `mapFilterArea`: 区域 / Area
-- `mapFilterUtilityType`: 道具类型 / Utility Type
-- `mapFilterFeatured`: 推荐 / Featured
-- `mapFilterAll`: 全部 / All
-- `clusteredUtilities`: 道具 / Utilities
-- `lineupVariants`: 道具丢法 / Lineup Variants
-- `variantCount`: 变体数量文案
-- `spawnRequirement`: 适用出生点 / 身位 / Spawn / Body Position
-- `targetPoints`: 目标点 / Target Points
-- `variantStartPoints`: 变体站位点 / Variant Start Points
-- `lineConnections`: 站位到目标连线 / Line Connections
+### 必须使用 `LocalizedText`
 
-## 检查方式
+- 地图、道具组和投掷方案等随内容数据变化的名称。
+- 投掷说明、站位要求、起止区域等教程业务文本。
+- Mirage 的内容来自 `lineups_mirage.json`；Ancient / Nuke 当前仅在 `LineupStore` 中提供双语地图名，尚无道具内容。
 
-提交前搜索 SwiftUI 文件中的 `Text("`、`Label("`、`Section("`、`navigationTitle("`。如果是固定 UI 文字，必须改成 `L10n.text(...)`。
+### 不进入本地化系统
+
+- 图片资源名、SF Symbols 名称、数据 ID 与 JSON 字段名。
+- 代码变量名、枚举 case、坐标键与开发者导出 JSON 的 schema。
+- `T` / `CT` 等游戏通用短标识。
+
+> Ancient / Nuke 当前地图 JPEG 的中文标注已烘焙在图片中，切换英文不会改变图片内文字。这是资源限制，不属于 `L10n` 缺失；正式发布前还需确认图片授权并决定是否替换为可本地化资源。
+
+## 新增或修改文案
+
+1. 在 `L10n.Key` 增加或确认 key；需要数量时使用关联值，例如 `lineupCount(Int)`。
+2. 在 `englishText(_:)` 与 `chineseText(_:)` 同步增加对应分支。
+3. View 中通过 `L10n.text(_:for:)` 使用，不直接写固定中文或英文。
+4. 数据内容继续使用 `LocalizedText`，不要把教程内容迁入 `L10n`。
+5. 完成后执行本文末尾的覆盖、硬编码与构建检查。
+
+## 当前 Key 清单（100）
+
+以下清单与 `AimNade/Localization/L10n.swift` 对齐。关联值只在文档中标出参数类型。
+
+<!-- key-inventory:start -->
+
+### 导航、地图上下文与语言（14）
+
+`maps`, `tactics`, `mapView`, `listView`, `mirage`, `mapPreviewOnly`, `mapDataPending`, `lineupCount(Int)`, `variantCount(Int)`, `settings`, `language`, `followSystem`, `simplifiedChinese`, `english`
+
+### 功能入口文案（6）
+
+`tacticalMap2D`, `utilityList`, `mapFeatureSubtitle`, `listFeatureSubtitle`, `searchFeatureSubtitle`, `favoritesFeatureSubtitle`
+
+### 分类、道具类型与难度（11）
+
+`categoryASite`, `categoryBSite`, `categoryMid`, `categoryTSide`, `categoryCTSide`, `smoke`, `flash`, `molotov`, `he`, `difficultyEasy`, `difficultyMedium`
+
+### 详情与教学内容结构（18）
+
+`overview`, `name`, `type`, `side`, `category`, `difficulty`, `teachingImages`, `startPosition`, `aimPoint`, `result`, `placeholder`, `position`, `startArea`, `targetArea`, `throwMethod`, `description`, `lineupSteps`, `notes`
+
+### 地图提示与开发者工具（12）
+
+`tapUtilityHint`, `developerMode`, `developerMapHint`, `liveCoordinates`, `lastEditedCoordinate`, `noEditedCoordinate`, `copyCoordinates`, `copyJSON`, `coordinatesCopied`, `jsonCopied`, `startPoint`, `targetPoint`
+
+### 关于页（11）
+
+`about`, `appDisplayName`, `appName`, `appIntro`, `creator`, `creatorName`, `version`, `unofficialNotice`, `unofficialNoticeText`, `acknowledgements`, `acknowledgementsText`
+
+### 地图筛选与图层（10）
+
+`mapFilterArea`, `mapFilterUtilityType`, `mapFilterFeatured`, `mapFilterAll`, `clusteredUtilities`, `lineupVariants`, `spawnRequirement`, `targetPoints`, `variantStartPoints`, `lineConnections`
+
+### 搜索（7）
+
+`close`, `search`, `searchPrompt`, `searchHint`, `searchNoResults`, `searchResultGroup`, `searchResultVariant`
+
+### 收藏、空状态与条目类型（11）
+
+`favorites`, `favoriteGroups`, `favoriteVariants`, `addFavorite`, `removeFavorite`, `emptyFavorites`, `emptyFavoritesMessage`, `emptyUtilities`, `emptyUtilitiesMessage`, `variantSubtitle`, `groupSubtitle`
+
+<!-- key-inventory:end -->
+
+## 当前未引用的 Key
+
+以下 14 个 key 在当前 Swift 调用点中没有引用，主要来自旧功能入口、旧独立搜索页或旧地图筛选 UI：
+
+`tacticalMap2D`, `utilityList`, `mapFeatureSubtitle`, `listFeatureSubtitle`, `searchFeatureSubtitle`, `favoritesFeatureSubtitle`, `mapFilterArea`, `mapFilterUtilityType`, `mapFilterFeatured`, `mirage`, `searchHint`, `searchNoResults`, `searchResultGroup`, `searchResultVariant`
+
+它们仍具备完整双语分支，但不代表对应旧界面仍存在。不要在普通本地化任务中顺手删除；如需清理，应单独确认全部调用面和文档影响。
+
+## 审计与验证
+
+### 1. 检查固定 UI 文案
+
+```bash
+rg -n 'Text\("[^"\\]*[A-Za-z\p{Han}]|Label\("[^"\\]*[A-Za-z\p{Han}]|Section\("[^"\\]*[A-Za-z\p{Han}]|navigationTitle\("[^"\\]*[A-Za-z\p{Han}]|Button\("[^"\\]*[A-Za-z\p{Han}]|TextField\("[^"\\]*[A-Za-z\p{Han}]' \
+  AimNade/AimNadeApp.swift AimNade/Views --glob '*.swift'
+```
+
+结果为空才表示没有发现这一类直接硬编码。仍需人工检查插值、辅助功能文案和其他构造方式。
+
+### 2. 检查 JSON 双语内容
+
+```bash
+jq -e '[.. | objects | select(has("en") or has("zhHans"))]
+  | all(has("en") and has("zhHans") and (.en | length > 0) and (.zhHans | length > 0))' \
+  AimNade/Data/lineups_mirage.json
+```
+
+### 3. 构建
+
+```bash
+xcodebuild -project AimNade.xcodeproj -scheme AimNade \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -configuration Debug build
+```
+
+当前没有测试 Target。涉及用户可见文案时，还应手动检查英文、简体中文与跟随系统三档语言。

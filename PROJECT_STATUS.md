@@ -2,8 +2,8 @@
 
 > 本文件是 Codex 与 DSH 共用的**进度快照**，每次完成任务后必须更新（规则见 `AGENTS.md` 第 10 节）。
 > 最后更新：2026-09-20
-> 任务前基线提交：`ffe928f`（`Refactor AimNade navigation around tactics`，已推送至 `origin/main`）
-> 最近一次构建验证：Mirage / Ancient / Nuke 三地图接入后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
+> 任务前基线提交：`35d1cb8`（`Polish tactics UI and add multi-map previews`，已推送至 `origin/main`）
+> 最近一次构建验证：P0-3 本地化文档同步后 Debug `xcodebuild` → **通过（exit 0）**（Xcode 27.0 / 27A266a，iPhone 17 + iOS 26.5 模拟器）
 
 ---
 
@@ -27,9 +27,10 @@
 3. **主界面/导航 UI/UX 重构已完成并通过用户审阅**：代码、文档、构建与代表性模拟器验证均已完成，已获准提交并推送。
 4. **战术页视觉层级优化已完成并通过用户预览**。
 5. **Mirage / Ancient / Nuke 三地图接入已完成**：Mirage 保留完整道具界面，Ancient / Nuke 使用专属主题的地图预览态，不编造道具数据。
-6. **随后进行专项 localization audit**（P0-3），修正 `docs/LOCALIZATION.md` 与实际 `L10n.Key` 的差异，**不要为了补 key 重构 App**。
-7. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片；未来再为 Ancient / Nuke 接入经核验的道具内容。
-8. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
+6. **专项 localization audit 已完成**（P0-3）：文档已与 100 个 `L10n.Key` 对齐，中英分支均为 100/100，未发现需要修改 Swift 的本地化缺口。
+7. **下一步处理 JSON 加载失败可观察化**（P1-4）：保留防崩溃 fallback，同时增加 Debug 错误信息和用户可理解的失败状态。
+8. 内容填充（P1，**不阻塞交付**）：录入真实 Mirage 道具数据；补齐 18 张教学图片；未来再为 Ancient / Nuke 接入经核验的道具内容。
+9. 明确标记占位/示例数据，避免被误当作已核实的真实道具数据。
 
 完整的优先级拆分见 `## Next`。
 
@@ -110,7 +111,7 @@
 
 ## In Progress
 
-- P0-3 localization audit 尚未开始；只对齐 `docs/LOCALIZATION.md` 与实际 100 个 `L10n.Key`，不重构 App。
+- P0-1、P0-2、P0-3 均已完成。当前下一项是 P1-4：让 Mirage JSON 加载失败在 Debug 与用户界面中可观察，同时保留防崩溃 fallback。
 
 ### 工作区状态
 
@@ -133,13 +134,12 @@
 - **内容体量小且为占位数据**：3 个道具组 / 6 个投掷方案，全部 T 方 Smoke。
 - **Ancient / Nuke 尚无道具数据**：当前只提供用户提供的中文标注地图预览，不含道具组、投掷方案或教学截图。
 - **JSON 加载失败路径不可见**：当前静默回退空 `Map`。已确认不是最终设计，优化方向见 `## Next` P1 第 4 项与 Known Issues 第 6 条。
-- `docs/LOCALIZATION.md` 与实际本地化 key 存在差异（登记 61 / 实际 100，差 39 个）。已排为 P0-3，做一次专项 localization audit **修正文档**（不重构 App），见 `## Next` P0 第 3 项。
 - 无测试覆盖。
 
 ## Next
 
 > 范围纪律：V1 可浏览 Mirage / Ancient / Nuke 三张 2D 地图，但当前只有 Mirage 具备道具内容。以下各项都不得引入 3D、视频、登录、后端或用户投稿。
-> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1、P0-2、主界面 UI/UX 重构、战术页视觉优化与三地图预览均已完成。当前继续 P0-3。
+> 真实教学截图允许继续使用占位图，补齐教学图片属于 P1-10；P0-1、P0-2、P0-3、主界面 UI/UX 重构、战术页视觉优化与三地图预览均已完成。当前继续 P1-4。
 > P0 的三项都属于"在当前实现上做检查或配置"，**不要因此新增大功能**。
 
 ### P0 — 交付前置与完整性确认
@@ -150,10 +150,10 @@
    - 检查内容：是否能正常进入、状态是否正确（含空状态）、中英两档文案是否都正确、深色模式下是否可读、有无崩溃或明显布局问题。
    - **已知可接受项**：教学图片显示占位图属预期行为，**不要把它记为新缺陷**（见第 10 项）。
    - 发现的问题按"明显问题"与"新功能需求"分类记录：明显问题可修，新功能需求只登记进本文件，不在本轮实现。
-3. **专项 localization audit**：`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记 61 个 key，实际 `L10n.Key` 有 100 个，**存在 39 个差异**。
-   - 目标：**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
-   - audit 范围：比对 `L10n.Key` 与实际清单、确认中英文双语分支无遗漏、确认 `Views/` 下无硬编码文案、把 V1 范围约束补进规范文档。
-   - **约束：不要为了补 key 而重构 App。** 只改文档；若发现代码侧真正不一致（例如某 key 只有英文没有中文），单独记录并按需最小修复，不做结构性改动。
+3. ✅ **专项 localization audit 已完成**：`docs/LOCALIZATION.md` 已登记全部 100 个 `L10n.Key`，并补齐职责边界、三地图范围、资源限制和审计方法。
+   - 英文分支 100/100、简体中文分支 100/100；Mirage JSON 的 40 个双语对象均包含非空 `en` / `zhHans`。
+   - `Views/` 与 App 入口的固定 UI 文案扫描没有发现直接硬编码。
+   - 14 个当前无 Swift 调用点的历史 key 已在规范中登记，本轮未扩大为代码清理。
 
 ### P1 — 数据可靠性与内容填充
 
@@ -298,9 +298,7 @@
 
 ### 🔵 文档与工程
 
-13. **`LOCALIZATION.md` 与实际本地化 key 存在差异，需进行一次专项 localization audit。** 具体：`docs/LOCALIZATION.md` 的"当前核心 key"清单登记 61 个，实际 `L10n.Key` 有 100 个，差 39 个；该文档也未反映当前三地图范围。
-    - 已排为 **P0-3**：目标是**修正文档与实际 key 的差异**，让规范文档重新可用于交接。
-    - **约束：不要为了补 key 而重构 App。** 详见 `## Next` P0 第 3 项。
+13. ✅ **本地化专项 audit 已完成**：`docs/LOCALIZATION.md` 已与全部 100 个 `L10n.Key`、当前三地图范围和职责边界对齐；英文与简体中文分支均完整覆盖。当前另有 14 个完整双语但无 Swift 调用点的历史 key，已登记但不影响运行。
 14. ✅ **README 已中文化并纳入同步维护**：文档描述当前实现与占位内容，`AGENTS.md` 文档索引已同步。详细进度仍只放在本文件；后续任务在 `Last Work` 记录 README 更新或无需更新的核对结论。
 15. `AGENTS.md` 与 `PROJECT_STATUS.md` 在本轮之前**均未被 git 跟踪**，有丢失风险；本轮已提交纳入（见 `## Last Work`）。
     - `CODEX.md` **仍未被跟踪**：它属于既有的项目说明书，不属于本轮交接文档范围，本轮未提交、未修改。
@@ -314,6 +312,18 @@
 20. `AboutView` 显示的版本号来自 `Bundle.main` 的 `CFBundleShortVersionString`（缺失时回退 `"1.0"`）；而 App 名称走的是 `L10n` 常量而非 Bundle。是否统一为只读 Bundle 元数据，待确认。
 
 ## Last Work
+
+### 2026-09-20 — P0-3 本地化专项核对
+
+- 将 `docs/LOCALIZATION.md` 从不完整的核心 key 摘要更新为当前完整规范：语言选择、`L10n` / `LocalizedText` / `InfoPlist.strings` 职责边界、三地图内容边界、图片内嵌中文限制、文案变更流程和 100-key 分组清单。
+- 自动比对 `L10n.Key`、`englishText(_:)` 与 `chineseText(_:)`：三者均为 100 个且集合完全一致，没有单语缺口。
+- 检查 App 入口与 `Views/` 的固定 UI 文案，没有发现 `Text` / `Label` / `Section` / `navigationTitle` / `Button` / `TextField` 直接硬编码的中英文文案。
+- `lineups_mirage.json` 共 40 个双语对象，非空 `en` / `zhHans` 覆盖为 40/40；两份 `InfoPlist.strings` 的显示名均为 `AimNade`。
+- 识别并登记 14 个当前无 Swift 调用点的历史 key；本轮不删除 key、不修改 Swift、JSON、本地化资源或 Xcode 工程。
+- `AGENTS.md` 已同步长期维护规则；README 已同步本地化文档状态和下一优先级。
+- 验证：`git diff --check`、key 清单对齐脚本与 Debug 构建通过；任务前已有的 `project.pbxproj`、Scheme、`CODEX.md` 与 `图库/` 保持原状。
+
+---
 
 ### 2026-09-20 — Ancient / Nuke 地图接入与三地图主题
 
@@ -477,21 +487,22 @@
 
 ### 当前基线
 
-- 分支 `main`：本轮任务前本地 `HEAD` 与 `origin/main` 同步在 `ffe928f` (`Refactor AimNade navigation around tactics`)；战术页视觉优化和三地图接入已由本轮任务提交并推送。
+- 分支 `main`：本轮任务前本地 `HEAD` 与 `origin/main` 同步在 `35d1cb8` (`Polish tactics UI and add multi-map previews`)；P0-3 本地化专项核对由本轮任务提交并推送。
 - Mirage 保留 3 组 / 6 方案占位数据与完整交互；Ancient / Nuke 是 0 道具数据的地图预览态，使用用户提供的中文标注 JPEG。
 - 任务前已存在的 Xcode 27 升级元数据差异、未跟踪 `CODEX.md` 和用户本地 `图库/` 仍保留；不要把它们混入后续提交。
 - Debug 构建通过（iPhone 17 + iOS 26.5 模拟器）；`assetutil` 确认三张地图入包；已检查三图浅色界面、Ancient / Nuke 深色界面、Mirage 点位选中卡和列表模式。
 
-### 建议的下一个任务：P0-3 localization audit
+### 建议的下一个任务：P1-4 JSON 加载失败可观察化
 
-**为什么是它**：当前主流程、三地图预览与交付资源均已完成，规范文档仍比实际 `L10n.Key` 少 39 个条目。
+**为什么是它**：P0 交付前置已经完成；当前 `LineupStore` 在 JSON 缺失或解码失败时静默回退空 Mirage，真实数据错误可能被误认为“没有内容”。
 
 **执行边界**：
 
-- 对齐 `docs/LOCALIZATION.md` 与实际 100 个 `L10n.Key`（当前登记 61，差 39）。
-- 确认英文和简体中文分支覆盖一致，并检查 `Views/` 下没有新增硬编码固定文案。
-- 把规范中的地图范围更新为 Mirage / Ancient / Nuke，同时保留"只有 Mirage 有道具数据"的真实边界。
-- 以文档修正为主；若发现真正的代码缺口，单独记录并最小修复，不做结构性重构。
+- 保留 fallback，继续确保 App 不因本地 JSON 错误崩溃。
+- Debug 环境输出带文件名和具体原因的 load / decode 错误。
+- Release / UI 层为 Mirage 数据失败提供明确空状态，并与 Ancient / Nuke 的正常预览态区分。
+- 不修改 JSON schema，不新增网络、后端、数据库或第三方依赖。
+- 验证正常 JSON 路径仍显示 3 组 / 6 方案，并单独验证缺失文件与解码失败两条错误路径。
 
 ### 内容填充任务（P1，不阻塞交付）
 
@@ -518,7 +529,7 @@
 ### 不要做的事
 
 - 不要在"产品流程检查"里夹带新功能；新需求只登记，不在本轮实现。
-- 不要为了补 localization key 而重构 App 或改动界面结构。
+- 本地化规范现已与 100 个 key 对齐；新增、删除或重命名 key 时同步维护源码双语分支与 `docs/LOCALIZATION.md`。
 - 不要把 `MapListView` 恢复成启动前置页——Mirage / Ancient / Nuke 已在战术页顶部统一切换。
 - 不要给开发者模式的坐标拖动加写回逻辑。
 - 不要通过静默 fallback 长期掩盖 JSON 数据错误。

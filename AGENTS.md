@@ -56,7 +56,7 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 |---|---|---|
 | `LineupStore.maps` 含 Mirage / Ancient / Nuke；`MapListView` 未接入根导航 | **刻意设计**。地图直接在战术页顶部切换；Ancient / Nuke 暂时是只读地图预览，不伪造道具数据 | 有可核验的 Ancient / Nuke 道具数据与教学素材时，再为对应地图接入完整学习流程 |
 | `LineupStore` 在 JSON 失败时回退空 `Map` | 保留 fallback（防 crash）**没有问题**；但"静默"需要改 | 后续任务：Debug 输出明确错误 + Release 显示 empty state |
-| `docs/LOCALIZATION.md` key 清单滞后 39 个 | **本轮不补**，不做零散修补 | 一次专项 localization audit 统一对齐 |
+| `docs/LOCALIZATION.md` 已与 100 个 `L10n.Key` 对齐 | 保持源码、英文分支、简体中文分支与文档清单同步 | 新增、删除或重命名 key 时，在同一任务更新四处并重新审计 |
 
 ## 4. 命名与本地化规则
 
@@ -64,7 +64,8 @@ V1 **明确不做**（不要主动实现，也不要为它们预留过度抽象�
 - 固定 UI 文案**必须**接入现有本地化系统：`L10n.Key` → 英文分支 → 简体中文分支，三处同步。**禁止**在 View 中硬写用户可见文本。
 - JSON 中的业务内容使用 `LocalizedText`（`en` / `zhHans`），**不**放进 `L10n`。
 - **图片资源名、代码变量名、数据 ID 一律使用英文**，不汉化。
-- `L10n.Key` 当前有 100 个 case。`docs/LOCALIZATION.md` 的"当前核心 key"清单只登记了 61 个，**新增文案时以 `L10n.swift` 为准**，不要照抄清单。
+- `L10n.Key` 当前有 100 个 case；`docs/LOCALIZATION.md` 已在 2026-09-20 专项审计中与源码对齐。`L10n.swift` 仍是实现真相源，新增、删除或重命名 key 时必须同步更新英文分支、简体中文分支和文档清单。
+- 当前有 14 个完整双语但没有 Swift 调用点的历史 key，清单见 `docs/LOCALIZATION.md`。**未引用 key 不代表旧功能仍存在**；不要在无关任务中顺手删除。
 - 提交前自检：在 `Views/` 下搜索 `Text("`、`Label("`、`Section("`、`navigationTitle("`，确认没有硬编码的固定文案（纯数字插值、已本地化的插值属合规）。
 
 ## 5. 数据规则
@@ -156,7 +157,7 @@ xcodebuild -project AimNade.xcodeproj -scheme AimNade -showdestinations
 | `AGENTS.md` | 本文件：长期约束与交接机制 | ✅ 已提交 | 维护中 |
 | `PROJECT_STATUS.md` | 当前进度快照（**每次任务后更新**） | ✅ 已提交 | 维护中 |
 | `CODEX.md` | 完整架构、功能清单、路线图 | ❌ **未跟踪** | 仍描述旧 Launcher 导航；本轮遵守既有工作边界未修改，纳管前需同步 |
-| `docs/LOCALIZATION.md` | 本地化规范 + 核心 key 清单 | ✅ 已跟踪 | 规范有效；key 清单滞后 39 个，待专项 audit |
+| `docs/LOCALIZATION.md` | 本地化规范 + 完整 key 清单 | ✅ 已跟踪 | 已完成专项 audit；100 个 key 与中英分支对齐 |
 | `README.md` | 中文项目介绍、功能、结构与运行指南（**不作为 AI 进度日志**） | ✅ 已跟踪 | 按第 10 节随相关变更同步维护 |
 
 > 进度记录的**唯一**去处是 `PROJECT_STATUS.md`。不要把进度写进 `README.md`，也不要在 `CODEX.md` 里维护状态。

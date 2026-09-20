@@ -94,7 +94,7 @@ docs/                       专项开发文档
 
 ## 后续方向
 
-优先完成本地化文档核对，再推进真实道具数据和截图填充、数据加载错误提示、自动化测试及设备适配验证。详细优先级、验收记录和已知问题见 [PROJECT_STATUS.md](PROJECT_STATUS.md)。
+下一步优先让 JSON 加载失败可被开发者和用户明确感知，再推进真实道具数据和截图填充、自动化测试及设备适配验证。本地化专项核对已完成。详细优先级、验收记录和已知问题见 [PROJECT_STATUS.md](PROJECT_STATUS.md)。
 
 ## 文档与维护约定
 
@@ -103,7 +103,7 @@ docs/                       专项开发文档
 | [README.md](README.md) | 面向读者的当前功能、使用方式、技术栈和项目结构 |
 | [AGENTS.md](AGENTS.md) | Codex / DSH 共用开发规则及任务结束检查要求 |
 | [PROJECT_STATUS.md](PROJECT_STATUS.md) | 进度快照、验证结果、已知问题与下一步交接 |
-| [docs/LOCALIZATION.md](docs/LOCALIZATION.md) | 本地化约定；其中 key 清单仍待专项核对，以当前源码为准 |
+| [docs/LOCALIZATION.md](docs/LOCALIZATION.md) | 本地化约定、完整 100-key 清单、职责边界与审计方法 |
 
 每次开发任务结束时都应检查 README：涉及功能、运行方式、依赖、目录、数据状态或限制的变化，须在同一任务中同步对应章节；无相关变化时无需改写 README，在项目状态中记录检查结论即可。只读任务只报告差异。具体要求见 `AGENTS.md` 第 10 节。
 
